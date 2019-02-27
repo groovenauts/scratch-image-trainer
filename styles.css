@@ -1,0 +1,154 @@
+/**
+ * Copyright 2019 Groovenauts, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =============================================================================
+ */
+
+html, body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+body {
+  display: flex;
+  flex-direction: column;
+}
+button:focus {
+  outline: 0;
+}
+
+root {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+header {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 18px;
+  text-align: center;
+  padding: 15px;
+  background: orange;
+  z-index: 20;
+}
+
+.main {
+  position: relative;
+  top: 320px;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 9px auto 0;
+  justify-content: center;
+}
+
+.loading-message {
+  text-align: center;
+}
+
+.webcam-continer {
+  position: fixed;
+  top: 50px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: orange;
+  z-index: 10;
+}
+
+.webcam-box-outer {
+  background: gray;
+  border: 1px solid #585858;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 5px;
+  margin: 10px;
+}
+
+.webcam-box-inner {
+  border: 1px solid #585858;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  width: 224px;
+}
+
+video.webcam {
+  transform: scaleX(-1);
+}
+
+#selectors {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.selector-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  margin: 10px;
+}
+
+.selector-label {
+  display: flex;
+  justify-content: center;
+}
+
+.predicted {
+  border: 3px dotted red;
+}
+
+.selector-canvas {
+  position: relative;
+  border: 1px solid #454545;
+  border-radius: 4px;
+}
+
+.capture-button {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+}
+
+#trainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#trainer > div{
+  display: flex;
+  justify-content: center;
+}
+
+.training-spinner {
+  margin: 6px;
+}
+
+#train-button {
+  margin: 6px;
+}
