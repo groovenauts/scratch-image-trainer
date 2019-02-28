@@ -118,8 +118,12 @@ video.webcam {
   justify-content: center;
 }
 
-.predicted {
+.selector-cell.predicted {
   border: 3px dotted red;
+}
+
+.selector-cell:not(.predicted) {
+  margin: 13px;
 }
 
 .selector-canvas {
