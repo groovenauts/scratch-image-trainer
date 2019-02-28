@@ -290,6 +290,40 @@ const Trainer = (props) => {
         });
     }
 
+    function save() {
+        async function handleSave(artifacts) {
+            const weightBlob = new Blob([artifacts.weightData], { type: "application/octet-stream"} );
+            const reader = new FileReader();
+            function fn() {
+                return new Promise((resolve, reject) => {
+                    reader.onerror = () => {
+                        reader.abort();
+                        reject(new DOMException("Can't load model weights binary."));
+                    };
+                    reader.onload = () => {
+                        resolve(reader.result);
+                    };
+                    reader.readAsDataURL(weightBlob);
+                });
+            }
+            const dataURL = await fn();
+            const b64 = dataURL.replace(/[^,]*,/, "");
+            const spec = {
+                "modelmodelTopology": artifacts.modelTopology,
+                "weightsManifest": [
+                    {
+                        "paths": ["weights.bin"],
+                        "weights": artifacts.weightSpecs
+                    }
+                ]
+            };
+            const json = JSON.stringify(spec);
+            // TODO: numbering for certain model and upload to cloud storage
+        }
+        props.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
+        });
+    }
+
     if (phase == "init") {
         return <div id="trainer">
               <div>
@@ -321,6 +355,15 @@ const Trainer = (props) => {
                 </div>
               <div>Epoch: {epoch}</div>
               <div>Loss: {loss}</div>
+              <div>
+                <button id="save-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={save} >
+                  {formatMessage({
+                      id: "save",
+                      default: "アップロード",
+                      description: "Text message on train button."
+                  })}
+                </button>
+              </div>
             </div>
     }
 }
@@ -388,4 +431,4 @@ const Application = () => {
 
 ReactDOM.render(<Application />, document.getElementById('app'));
 
-// vim:sw=4
+// vim:ft=javascript sw=4
