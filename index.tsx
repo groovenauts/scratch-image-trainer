@@ -267,7 +267,7 @@ const Trainer = (props) => {
         }
 
         /* convert into embeddings tensors */
-        const embeddings = props.mobileNet.predict(xs);
+        const embeddings = tf.tidy(() => props.mobileNet.predict(xs));
         xs.dispose();
 
         const optimizer = tf.train.adam(0.0001);
@@ -382,10 +382,15 @@ const Main = () => {
         if (mobileNet == null) {
             tf.loadLayersModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json').then(net => {
                 const layer = net.getLayer('conv_pw_13_relu');
-                setMobileNet(tf.model({inputs: net.inputs, outputs: layer.output}));
+                // warm up;
+                const truncatedNet = tf.model({inputs: net.inputs, outputs: layer.output});
+                tf.tidy(() => {
+                    truncatedNet.predict(tf.zeros([1, 224, 224, 3]));
+                });
+                setMobileNet(truncatedNet);
             });
         } else if (headNet == null) {
-            setHeadNet(tf.sequential({
+            const headNet = tf.sequential({
                                      layers: [
                                          tf.layers.flatten({inputShape: [7,7,256]}),
                                          tf.layers.dense({
@@ -401,7 +406,12 @@ const Main = () => {
                                                          activation: "softmax"
                                          })
                                      ]
-            }));
+            });
+            // warm up;
+            tf.tidy(() => {
+                headNet.predict(tf.zeros([1].concat(mobileNet.outputs[0].shape.slice(1))));
+            });
+            setHeadNet(headNet);
         }
 
         return () => {};
