@@ -241,51 +241,58 @@ const Trainer = (props) => {
         }
     });
 
-    async function train() {
+    function train() {
         setPhase("training");
 
-        /* setup image dataset */
-        let xs = null;
-        let ys = null;
-        for ( let i = 0; i < MAX_LABELS; i++) {
-            const tensor = props.images[i][0];
-            if (tensor) {
-                if (xs == null) {
-                    xs = tf.clone(tensor);
-                    ys = tf.tidy(() => tf.oneHot((tf.ones([tensor.shape[0]]).mul(i)).toInt(), MAX_LABELS));
-                } else {
-                    const oldX = xs;
-                    const oldY = ys;
-                    xs = oldX.concat(tensor, 0);
-                    const labels = tf.tidy(() => tf.oneHot((tf.ones([tensor.shape[0]]).mul(i)).toInt(), MAX_LABELS));
-                    ys = oldY.concat(labels, 0);
-                    oldX.dispose();
-                    oldY.dispose();
-                    labels.dispose();
+        setTimeout(() => {
+            /* setup image dataset */
+            let xs = null;
+            let ys = null;
+            for ( let i = 0; i < MAX_LABELS; i++) {
+                const tensor = props.images[i][0];
+                if (tensor) {
+                    if (xs == null) {
+                        xs = tf.clone(tensor);
+                        ys = tf.tidy(() => tf.oneHot((tf.ones([tensor.shape[0]]).mul(i)).toInt(), MAX_LABELS));
+                    } else {
+                        const oldX = xs;
+                        const oldY = ys;
+                        xs = oldX.concat(tensor, 0);
+                        const labels = tf.tidy(() => tf.oneHot((tf.ones([tensor.shape[0]]).mul(i)).toInt(), MAX_LABELS));
+                        ys = oldY.concat(labels, 0);
+                        oldX.dispose();
+                        oldY.dispose();
+                        labels.dispose();
+                    }
                 }
             }
-        }
 
-        /* convert into embeddings tensors */
-        const embeddings = tf.tidy(() => props.mobileNet.predict(xs));
-        xs.dispose();
-
-        const optimizer = tf.train.adam(0.0001);
-        props.headNet.compile({optimizer: optimizer, loss: "categoricalCrossentropy"});
-        const batchSize = xs.shape[0];
-
-        const epochs = 40;
-        props.headNet.fit(embeddings, ys, {
-            batchSize,
-            epochs: epochs,
-            callbacks: {
-                onEpochEnd: epochCallback
+            if (xs == null){
+                setPhase("init");
+                return
             }
-        }).then(() => {
-            embeddings.dispose();
-            ys.dispose();
-            setPhase("done");
-        });
+
+            /* convert into embeddings tensors */
+            const embeddings = tf.tidy(() => props.mobileNet.predict(xs));
+            xs.dispose();
+
+            const optimizer = tf.train.adam(0.0001);
+            props.headNet.compile({optimizer: optimizer, loss: "categoricalCrossentropy"});
+            const batchSize = xs.shape[0];
+
+            const epochs = 40;
+            props.headNet.fit(embeddings, ys, {
+                batchSize,
+                epochs: epochs,
+                callbacks: {
+                    onEpochEnd: epochCallback
+                }
+            }).then(() => {
+                embeddings.dispose();
+                ys.dispose();
+                setPhase("done");
+            });
+        }, 10);
     }
 
     function save() {
