@@ -44,7 +44,7 @@ const Header = (props) => {
     return <header onClick={props.onClick} >
         <div>{formatMessage({
                             id: "headerMessage",
-                            default: "写真をおぼえさせよう",
+                            default: "スクラッチに写真をおぼえさせよう!",
                             description: "Text message in header."
         })}</div>
         </header>;
