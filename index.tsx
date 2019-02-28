@@ -18,7 +18,7 @@
 import * as tf from '@tensorflow/tfjs';
 
 import formatMessage from "format-message";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 let translations = {
@@ -58,7 +58,7 @@ const WebCam = (props) => {
     let stopCallback = null;
 
     function handleStream(stream) {
-        if (props.webcamRef) {
+        if (props.webcamRef.current) {
             props.webcamRef.current.srcObject = stream;
             stopCallback = () => {
                 stream.getVideoTracks().forEach((tr) => { tr.stop(); });
@@ -152,17 +152,13 @@ function drawCanvas(image, canvasRef) {
 }
 
 const Selector = (props) => {
-    let canvasRef = null;
-
-    function setCanvasRef(elm) {
-        canvasRef = elm;
-    }
+    const canvasRef = useRef();
 
     const [tensors, setTensors] = props.imageState;
 
     let handleAddClick = (e) => {
         const image = capture(props.webcamRef);
-        drawCanvas(image, canvasRef);
+        drawCanvas(image, canvasRef.current);
         if (tensors == null) {
             setTensors(tf.keep(image));
         } else {
@@ -184,7 +180,7 @@ const Selector = (props) => {
           <span className="mdl-chip" ><span className="mdl-chip__text">{ props.index + 1 }</span></span>
         </div>
         <div className="mdl-badge mdl-badge--overlap" data-badge={badge} >
-          <canvas className="selector-canvas" id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={setCanvasRef} />
+          <canvas className="selector-canvas" id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
         <button className="capture-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" onClick={handleAddClick} >
           <i className="material-icons">add_a_photo</i>
@@ -378,6 +374,8 @@ const Main = () => {
     const [headNet, setHeadNet] = useState(null);
     const [predicted, setPredicted] = useState(null);
 
+    const webcamRef = useRef(null);
+
     useEffect(() => {
         if (mobileNet == null) {
             tf.loadLayersModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json').then(net => {
@@ -408,7 +406,6 @@ const Main = () => {
     });
 
     if (mobileNet && headNet) {
-        const webcamRef = React.createRef();
         return <div className="main">
                 <WebCam webcamRef={webcamRef} />
                 <Selectors webcamRef={webcamRef} images={images} predicted={predicted} />
