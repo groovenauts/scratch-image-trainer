@@ -160,10 +160,10 @@ const Selector = (props) => {
         const image = capture(props.webcamRef);
         drawCanvas(image, canvasRef.current);
         if (tensors == null) {
-            setTensors(tf.keep(image));
+            setTensors(image);
         } else {
             const old = tensors;
-            setTensors(tf.keep(old.concat(image, 0)));
+            setTensors(old.concat(image, 0));
             old.dispose();
         }
     };
@@ -251,17 +251,16 @@ const Trainer = (props) => {
             const tensor = props.images[i][0];
             if (tensor) {
                 if (xs == null) {
-                    xs = tf.keep(tensor);
+                    xs = tf.clone(tensor);
                     ys = tf.tidy(() => tf.oneHot((tf.ones([tensor.shape[0]]).mul(i)).toInt(), MAX_LABELS));
                 } else {
                     const oldX = xs;
                     const oldY = ys;
-                    xs = tf.keep(oldX.concat(tensor, 0));
+                    xs = oldX.concat(tensor, 0);
                     const labels = tf.tidy(() => tf.oneHot((tf.ones([tensor.shape[0]]).mul(i)).toInt(), MAX_LABELS));
-                    ys = tf.keep(oldY.concat(labels, 0));
+                    ys = oldY.concat(labels, 0);
                     oldX.dispose();
                     oldY.dispose();
-                    tensor.dispose();
                     labels.dispose();
                 }
             }
@@ -269,6 +268,7 @@ const Trainer = (props) => {
 
         /* convert into embeddings tensors */
         const embeddings = props.mobileNet.predict(xs);
+        xs.dispose();
 
         const optimizer = tf.train.adam(0.0001);
         props.headNet.compile({optimizer: optimizer, loss: "categoricalCrossentropy"});
@@ -282,6 +282,8 @@ const Trainer = (props) => {
                 onEpochEnd: epochCallback
             }
         }).then(() => {
+            embeddings.dispose();
+            ys.dispose();
             setPhase("done");
         });
     }
