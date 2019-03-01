@@ -21,6 +21,11 @@ import formatMessage from "format-message";
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
+import fetch from 'node-fetch';
+
+const postURL = "https://magellan-file-webcamdata-dot-ai-for-edu.appspot.com/upload";
+const accessKey = process.env.UPLOAD_TOKEN;
+
 let translations = {
   "ja": {
     "headerMessage": "スクラッチに写真をおぼえさせよう!",
@@ -205,6 +210,7 @@ const Trainer = (props) => {
     const [ phase, setPhase ] = useState("init");
     const [ loss, setLoss ] = useState(null);
     const [ epoch, setEpoch ] = useState(0);
+    const [ modelKey, setModelKey ] = useState(null);
 
     async function epochCallback(e, logs) {
         setLoss(logs.loss.toFixed(5));
@@ -212,7 +218,7 @@ const Trainer = (props) => {
     }
 
     useEffect(() => {
-        if (phase == "training") {
+        if (phase == "training" || phase == "uploading") {
             componentHandler.upgradeAllRegistered();
         }
         if (phase == "done") {
@@ -312,7 +318,7 @@ const Trainer = (props) => {
                 });
             }
             const dataURL = await fn();
-            const b64 = dataURL.replace(/[^,]*,/, "");
+            const b64 = dataURL.replace(/^[^,]*,/, "");
             const spec = {
                 "modelmodelTopology": artifacts.modelTopology,
                 "weightsManifest": [
@@ -323,54 +329,71 @@ const Trainer = (props) => {
                 ]
             };
             const json = JSON.stringify(spec);
-            // TODO: numbering for certain model and upload to cloud storage
+
+            function upload(filename, b64_content) {
+                return new Promise((resolve, reject) => {
+                    const req = "key=" + accessKey + "&filename=" + filename + "&content=" + b64_content.replace(/\+/g, "%2b");
+                    window.fetch(postURL, {headers: { "content-type": "application/x-www-form-urlencoded" }, body: req, method: "POST", mode: "no-cors" })
+                        .then(res => resolve())
+                        .catch(error => {
+                            console.log("POST model failed(" + filename + "): " + error)
+                            setPhase("done");
+                            reject();
+                        });
+                });
+            }
+
+            const id = ("00000000" + Math.floor((Math.random()*10000000))).slice(-7);
+            const dir = "models/image-detection/v1/" + id;
+
+            await upload(dir + "/weights.bin", b64);
+            await upload(dir + "/model.json", btoa(json));
+            setModelKey(id);
         }
-        props.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
-        });
+        setPhase("uploading");
+        setTimeout(() => {
+            props.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
+                setPhase("uploaded");
+            });
+        }, 10);
     }
 
-    if (phase == "init") {
-        return <div id="trainer">
-              <div>
-                <button id="train-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={train} >
+    const elms = [];
+
+    if (phase == "init" || phase == "done" || phase == "uploaded") {
+        elms.push(<div key="train-button" ><button id="train-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={train} >
                   {formatMessage({
-                      id: "train",
-                      default: "トレーニング",
-                      description: "Text message on train button."
+                                 id: "train",
+                                 default: "トレーニング",
+                                 description: "Text message on train button."
                   })}
-                </button>
-                </div>
-            </div>
-    } else if (phase == "training") {
-        return <div id="trainer">
-              <div className="training-spinner"><div className="mdl-spinner mdl-js-spinner is-active"></div></div>
-              <div>Epoch: {epoch}</div>
-              <div>Loss: {loss}</div>
-            </div>
-    } else {
-        return <div id="trainer">
-              <div>
-                <button id="train-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={train} >
-                  {formatMessage({
-                      id: "train",
-                      default: "トレーニング",
-                      description: "Text message on train button."
-                  })}
-                </button>
-                </div>
-              <div>Epoch: {epoch}</div>
-              <div>Loss: {loss}</div>
-              <div>
-                <button id="save-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={save} >
-                  {formatMessage({
-                      id: "save",
-                      default: "アップロード",
-                      description: "Text message on train button."
-                  })}
-                </button>
-              </div>
-            </div>
+                  </button></div>);
     }
+    if (phase == "training" || phase == "uploading") {
+        elms.push(<div key="spinner" className="training-spinner"><div className="mdl-spinner mdl-js-spinner is-active"></div></div>);
+    }
+    if (phase == "training" || phase == "done" || phase == "uploading" || phase == "uploaded") {
+        elms.push(<div key="epoch" >Epoch: {epoch}</div>);
+        elms.push(<div key="loss" >Loss: {loss}</div>);
+    }
+    if (phase == "done") {
+        elms.push(<div key="save-button" >
+                    <button id="save-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={save} >
+                      {formatMessage({
+                          id: "save",
+                          default: "アップロード",
+                          description: "Text message on upload button."
+                      })}
+                    </button>
+                  </div>);
+    }
+    if (phase == "uploaded") {
+        elms.push(<div key="model-key" >カギをゲットした: <span>{modelKey}</span></div>);
+    }
+
+    return <div id="trainer">
+        {elms}
+        </div>
 }
 
 const Main = () => {
