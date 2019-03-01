@@ -320,7 +320,7 @@ const Trainer = (props) => {
             const dataURL = await fn();
             const b64 = dataURL.replace(/^[^,]*,/, "");
             const spec = {
-                "modelmodelTopology": artifacts.modelTopology,
+                "modelTopology": artifacts.modelTopology,
                 "weightsManifest": [
                     {
                         "paths": ["weights.bin"],
