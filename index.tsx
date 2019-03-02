@@ -215,6 +215,7 @@ const Selectors = (props) => {
 }
 
 const Trainer = (props) => {
+    const [headNet, setHeadNet] = useState(null);
     const [ phase, setPhase ] = useState("init");
     const [ loss, setLoss ] = useState(null);
     const [ epoch, setEpoch ] = useState(0);
@@ -236,7 +237,7 @@ const Trainer = (props) => {
                 if (video && video.current) {
                     const image = capture(props.webcamRef);
                     const pred = tf.tidy(() => {
-                        const label = props.headNet.predict(props.mobileNet.predict(image)).as1D().argMax();
+                        const label = headNet.predict(props.mobileNet.predict(image)).as1D().argMax();
                         return label;
                     });
                     props.setPredicted(pred.dataSync()[0]);
@@ -286,16 +287,34 @@ const Trainer = (props) => {
                 return
             }
 
+            const net = tf.sequential({
+                                      layers: [
+                                          tf.layers.flatten({inputShape: [7,7,256]}),
+                                          tf.layers.dense({
+                                                          units: 100,
+                                                          activation: "relu",
+                                                          kernelInitializer: "varianceScaling",
+                                                          useBias: true
+                                          }),
+                                          tf.layers.dense({
+                                                          units: MAX_LABELS,
+                                                          kernelInitializer: "varianceScaling",
+                                                          useBias: false,
+                                                          activation: "softmax"
+                                          })
+                                      ]
+            });
+
             /* convert into embeddings tensors */
             const embeddings = tf.tidy(() => props.mobileNet.predict(xs));
             xs.dispose();
 
             const optimizer = tf.train.adam(0.0001);
-            props.headNet.compile({optimizer: optimizer, loss: "categoricalCrossentropy"});
+            net.compile({optimizer: optimizer, loss: "categoricalCrossentropy"});
             const batchSize = xs.shape[0];
 
-            const epochs = 40;
-            props.headNet.fit(embeddings, ys, {
+            const epochs = 50;
+            net.fit(embeddings, ys, {
                 batchSize,
                 epochs: epochs,
                 callbacks: {
@@ -304,6 +323,8 @@ const Trainer = (props) => {
             }).then(() => {
                 embeddings.dispose();
                 ys.dispose();
+                if (headNet) { headNet.dispose();}
+                setHeadNet(net);
                 setPhase("done");
             });
         }, 10);
@@ -360,7 +381,7 @@ const Trainer = (props) => {
         }
         setPhase("uploading");
         setTimeout(() => {
-            props.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
+            headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
                 setPhase("uploaded");
             });
         }, 10);
@@ -411,7 +432,6 @@ const Main = () => {
     }
 
     const [mobileNet, setMobileNet] = useState(null);
-    const [headNet, setHeadNet] = useState(null);
     const [predicted, setPredicted] = useState(null);
 
     const webcamRef = useRef(null);
@@ -427,39 +447,16 @@ const Main = () => {
                 });
                 setMobileNet(truncatedNet);
             });
-        } else if (headNet == null) {
-            const headNet = tf.sequential({
-                                     layers: [
-                                         tf.layers.flatten({inputShape: [7,7,256]}),
-                                         tf.layers.dense({
-                                                         units: 100,
-                                                         activation: "relu",
-                                                         kernelInitializer: "varianceScaling",
-                                                         useBias: true
-                                         }),
-                                         tf.layers.dense({
-                                                         units: MAX_LABELS,
-                                                         kernelInitializer: "varianceScaling",
-                                                         useBias: false,
-                                                         activation: "softmax"
-                                         })
-                                     ]
-            });
-            // warm up;
-            tf.tidy(() => {
-                headNet.predict(tf.zeros([1].concat(mobileNet.outputs[0].shape.slice(1))));
-            });
-            setHeadNet(headNet);
         }
 
         return () => {};
     });
 
-    if (mobileNet && headNet) {
+    if (mobileNet) {
         return <div className="main">
                 <WebCam webcamRef={webcamRef} />
                 <Selectors webcamRef={webcamRef} images={images} predicted={predicted} />
-                <Trainer images={images} mobileNet={mobileNet} headNet={headNet} webcamRef={webcamRef} setPredicted={setPredicted} />
+                <Trainer images={images} mobileNet={mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} />
             </div>
     } else {
         return <div className="main"><span className="loading-message">Loading models...</spam></div>
