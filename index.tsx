@@ -121,9 +121,17 @@ function cropImage(img) {
 }
 
 function capture(ref) {
+    const video = ref.current;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.width;
+    canvas.height = video.height;
+    const context = canvas.getContext("2d");
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
     return tf.tidy(() => {
         // Reads the image as a Tensor from the webcam <video> element.
-        const webcamImage = tf.browser.fromPixels(ref.current);
+        const webcamImage = tf.browser.fromPixels(canvas);
 
         // Crop the image so we're using the center square of the rectangular
         // webcam.

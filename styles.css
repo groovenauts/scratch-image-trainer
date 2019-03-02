@@ -130,6 +130,7 @@ video.webcam {
   position: relative;
   border: 1px solid #454545;
   border-radius: 4px;
+  transform: scaleX(-1);
 }
 
 .capture-button {
