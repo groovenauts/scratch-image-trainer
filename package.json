@@ -2,7 +2,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "parcel --hmr-port 8089 index.html",
-    "build": "parcel build index.html"
+    "build": "parcel build index.html --public-url ./"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^0.15.3",
