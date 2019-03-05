@@ -90,7 +90,7 @@ const WebCam = (props) => {
         navigator.getUserMedia = navigator.getUserMedia ||
             navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
             navigatorAny.msGetUserMedia;
-        if (navigator.getUserMedia) {
+        if (props.videoFlag && navigator.getUserMedia) {
             navigator.getUserMedia({video: true}, handleStream, () => null);
             return () => {
                 if (stopCallback) {
@@ -100,12 +100,19 @@ const WebCam = (props) => {
         } else {
             return;
         }
-    }, []);
+    }, [props.videoFlag]);
+
+    let onClick = null;
+    if (!props.videoFlag) {
+        onClick = () => {
+            props.setVideoFlag(true)
+        }
+    }
 
     return <div className="webcam-continer">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
-            <video autoPlay playsInline muted className="webcam" width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef}></video>
+            <video autoPlay playsInline muted className="webcam" width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} onClick={onClick} ></video>
           </div>
         </div>
       </div>
@@ -233,7 +240,7 @@ const Trainer = (props) => {
         if (phase == "training" || phase == "uploading") {
             componentHandler.upgradeAllRegistered();
         }
-        if (phase == "done") {
+        if (phase == "done" || (phase == "uploaded" && props.videoFlag)) {
             let running = true;
             const video = props.webcamRef;
             const fn = () => {
@@ -383,6 +390,7 @@ const Trainer = (props) => {
         setTimeout(() => {
             headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
                 setPhase("uploaded");
+                props.setVideoFlag(false);
             });
         }, 10);
     }
@@ -432,6 +440,7 @@ const Main = (props) => {
     }
 
     const [predicted, setPredicted] = useState(null);
+    const [videoFlag, setVideoFlag] = useState(true);
 
     const webcamRef = useRef(null);
 
@@ -447,9 +456,9 @@ const Main = (props) => {
 
     if (props.mobileNet) {
         return <div className="main">
-                <WebCam webcamRef={webcamRef} />
+                <WebCam webcamRef={webcamRef} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
                 <Selectors webcamRef={webcamRef} mobileNet={props.mobileNet} images={images} predicted={predicted} />
-                <Trainer images={images} mobileNet={props.mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} />
+                <Trainer images={images} mobileNet={props.mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
             </div>
     } else {
         return <div className="main"><span className="loading-message">Loading models...</spam></div>
