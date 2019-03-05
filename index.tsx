@@ -323,6 +323,7 @@ const Trainer = (props) => {
             }).then(() => {
                 xs.dispose();
                 ys.dispose();
+                optimizer.dispose();
                 if (headNet) { headNet.dispose();}
                 setHeadNet(net);
                 setPhase("done");
