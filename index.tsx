@@ -172,12 +172,16 @@ const Selector = (props) => {
     let handleAddClick = (e) => {
         const image = capture(props.webcamRef);
         drawCanvas(image, canvasRef.current);
+        const embedding = tf.tidy(() => props.mobileNet.predict([image]));
+        image.dispose();
         if (tensors == null) {
-            setTensors(image);
+            setTensors(embedding);
         } else {
             const old = tensors;
-            setTensors(old.concat(image, 0));
+            const newTensors = tf.tidy(() => tf.concat([old, embedding], 0));
             old.dispose();
+            embedding.dispose();
+            setTensors(newTensors);
         }
     };
 
@@ -209,7 +213,7 @@ const Selectors = (props) => {
     }, []);
 
     for (let i = 0; i < MAX_LABELS; i++) {
-        selectors.push(<Selector key={i} index={i} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} />);
+        selectors.push(<Selector key={i} index={i} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} mobileNet={props.mobileNet} />);
     }
     return <div id="selectors">{selectors}</div>
 }
@@ -305,23 +309,19 @@ const Trainer = (props) => {
                                       ]
             });
 
-            /* convert into embeddings tensors */
-            const embeddings = tf.tidy(() => props.mobileNet.predict(xs));
-            xs.dispose();
-
             const optimizer = tf.train.adam(0.0001);
             net.compile({optimizer: optimizer, loss: "categoricalCrossentropy"});
             const batchSize = xs.shape[0];
 
             const epochs = 50;
-            net.fit(embeddings, ys, {
+            net.fit(xs, ys, {
                 batchSize,
                 epochs: epochs,
                 callbacks: {
                     onEpochEnd: epochCallback
                 }
             }).then(() => {
-                embeddings.dispose();
+                xs.dispose();
                 ys.dispose();
                 if (headNet) { headNet.dispose();}
                 setHeadNet(net);
@@ -455,7 +455,7 @@ const Main = () => {
     if (mobileNet) {
         return <div className="main">
                 <WebCam webcamRef={webcamRef} />
-                <Selectors webcamRef={webcamRef} images={images} predicted={predicted} />
+                <Selectors webcamRef={webcamRef} mobileNet={mobileNet} images={images} predicted={predicted} />
                 <Trainer images={images} mobileNet={mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} />
             </div>
     } else {
