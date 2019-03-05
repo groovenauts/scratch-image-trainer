@@ -177,9 +177,8 @@ const Selector = (props) => {
         if (tensors == null) {
             setTensors(embedding);
         } else {
-            const old = tensors;
-            const newTensors = tf.tidy(() => tf.concat([old, embedding], 0));
-            old.dispose();
+            // previous tensor will disposed via useEffect() cleanup in Main components.
+            const newTensors = tf.tidy(() => tf.concat([tensors, embedding], 0));
             embedding.dispose();
             setTensors(newTensors);
         }
@@ -435,6 +434,16 @@ const Main = (props) => {
     const [predicted, setPredicted] = useState(null);
 
     const webcamRef = useRef(null);
+
+    for ( let i = 0; i < MAX_LABELS; i++ ) {
+        useEffect(() => {
+            return () => {
+                if (images[i][0]) {
+                    images[i][0].dispose();
+                }
+            };
+        }, [images[i][0]]);
+    }
 
     if (props.mobileNet) {
         return <div className="main">
