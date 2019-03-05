@@ -426,38 +426,21 @@ const Trainer = (props) => {
         </div>
 }
 
-const Main = () => {
+const Main = (props) => {
     const images = [];
     for ( let i = 0; i < MAX_LABELS; i++) {
         images.push(useState(null));
     }
 
-    const [mobileNet, setMobileNet] = useState(null);
     const [predicted, setPredicted] = useState(null);
 
     const webcamRef = useRef(null);
 
-    useEffect(() => {
-        if (mobileNet == null) {
-            tf.loadLayersModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json').then(net => {
-                const layer = net.getLayer('conv_pw_13_relu');
-                // warm up;
-                const truncatedNet = tf.model({inputs: net.inputs, outputs: layer.output});
-                tf.tidy(() => {
-                    truncatedNet.predict(tf.zeros([1, 224, 224, 3]));
-                });
-                setMobileNet(truncatedNet);
-            });
-        }
-
-        return () => {};
-    });
-
-    if (mobileNet) {
+    if (props.mobileNet) {
         return <div className="main">
                 <WebCam webcamRef={webcamRef} />
-                <Selectors webcamRef={webcamRef} mobileNet={mobileNet} images={images} predicted={predicted} />
-                <Trainer images={images} mobileNet={mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} />
+                <Selectors webcamRef={webcamRef} mobileNet={props.mobileNet} images={images} predicted={predicted} />
+                <Trainer images={images} mobileNet={props.mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} />
             </div>
     } else {
         return <div className="main"><span className="loading-message">Loading models...</spam></div>
@@ -466,9 +449,32 @@ const Main = () => {
 
 const Application = () => {
     const [ started, setStarted ] = useState(false);
+    const [mobileNet, setMobileNet] = useState(null);
+
+    useEffect(() => {
+        let rootNet = null;
+        if (mobileNet == null) {
+            tf.loadLayersModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json').then(net => {
+                rootNet = net;
+                const layer = net.getLayer('conv_pw_13_relu');
+                const truncatedNet = tf.model({inputs: net.inputs, outputs: layer.output});
+                // warm up;
+                tf.tidy(() => {
+                    truncatedNet.predict(tf.zeros([1, 224, 224, 3]));
+                });
+                setMobileNet(truncatedNet);
+            });
+        }
+
+        return () => {
+            if (rootNet) {
+                rootNet.dispose();
+            }
+        };
+    }, []);
 
     if ( started ) {
-        return <div className="root"><Header onClick={() => setStarted(false)} /><Main /></div>;
+        return <div className="root"><Header onClick={() => setStarted(false)} /><Main mobileNet={mobileNet} /></div>;
     } else {
         return <div className="root"><Header onClick={() => setStarted(true)} /></div>;
     }
