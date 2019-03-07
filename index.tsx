@@ -57,6 +57,18 @@ const Header = (props) => {
 
 const IMAGE_SIZE = 224;
 
+class AppInfo {
+    constructor(
+                public selectorNumber: number,
+                public setSelectorNumber: (s: number) => void,
+                public sampleImages: [(ImageData|null), ((ImageData|null)) => void][]
+    ){
+        this.selectorNumber = selectorNumber;
+        this.setSelectorNumber = setSelectorNumber;
+        this.sampleImages = sampleImages;
+    }
+};
+
 const WebCam = (props) => {
     const [ videoSize, setVideoSize ] = useState([320, 240]);
 
@@ -117,7 +129,7 @@ const WebCam = (props) => {
         <div className="webcam-controller">
           { props.videoFlag ?
               <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={() => props.setVideoFlag(false) } ><i className="material-icons">pause</i></button> :
-              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={() => props.setVideoFlag(true) } ><i className="material-icons">play_circle_outline</i></button>}
+              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={() => props.setVideoFlag(true) } ><i className="material-icons">play_circle_filled</i></button>}
         </div>
         </div>
       </div>
@@ -159,9 +171,8 @@ function capture(ref) {
     });
 }
 
-function drawCanvas(image, canvasRef) {
+function convertToImageData(image) {
     const [width, height] = [IMAGE_SIZE, IMAGE_SIZE];
-    const ctx = canvasRef.getContext('2d');
     const imageData = new ImageData(width, height);
     const data = image.dataSync();
     for (let y = 0; y < height; ++y) {
@@ -173,6 +184,11 @@ function drawCanvas(image, canvasRef) {
             imageData.data[j + 3] = 255;
         }
     }
+    return imageData;
+}
+
+function drawCanvas(imageData, canvasRef) {
+    const ctx = canvasRef.getContext('2d');
     ctx.putImageData(imageData, 0, 0);
 }
 
@@ -183,9 +199,16 @@ const Selector = (props) => {
     const [tensors, setTensors] = props.imageState;
 
     useEffect(() => {
+        if (props.imageData) {
+            drawCanvas(props.imageData, canvasRef.current);
+        }
+    }, [props.imageData]);
+
+    useEffect(() => {
         const addSample = () => {
             const image = capture(props.webcamRef);
-            drawCanvas(image, canvasRef.current);
+            const imData = convertToImageData(image);
+            props.setImageData(imData);
             const embedding = tf.tidy(() => props.mobileNet.predict([image]));
             image.dispose();
             if (tensors == null) {
@@ -200,6 +223,14 @@ const Selector = (props) => {
 
         if (capturing) {
             setTimeout(addSample, 200);
+        } else {
+            // draw blank to reset canvas content when tensors is set to null from menu
+            if (tensors == null) {
+                tf.tidy(() => {
+                    const image = tf.ones([1, 224, 224, 3]);
+                    props.setImageData(convertToImageData(image));
+                });
+            }
         }
     }, [capturing, tensors]);
 
@@ -238,19 +269,17 @@ const AddSelector = (props) => {
 };
 
 const Selectors = (props) => {
-    const [ selectorNumber, setSelectorNumber ] = useState(2);
-
     let selectors = [];
 
     useEffect(() => {
         componentHandler.upgradeAllRegistered();
     }, props.images.map((e) => e[0]));
 
-    for (let i = 0; i < selectorNumber; i++) {
-        selectors.push(<Selector key={i} index={i} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} mobileNet={props.mobileNet} />);
+    for (let i = 0; i < props.appInfo.selectorNumber; i++) {
+        selectors.push(<Selector key={i} index={i} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} mobileNet={props.mobileNet} imageData={props.appInfo.sampleImages[i][0]} setImageData={props.appInfo.sampleImages[i][1]} />);
     }
-    if ( selectorNumber < MAX_LABELS ) {
-        selectors.push(<AddSelector key="addSelector" index={selectorNumber} incrementSelector={() => setSelectorNumber(selectorNumber+1)} />);
+    if ( props.appInfo.selectorNumber < MAX_LABELS ) {
+        selectors.push(<AddSelector key="addSelector" index={props.appInfo.selectorNumber} incrementSelector={() => props.appInfo.setSelectorNumber(props.appInfo.selectorNumber+1)} />);
     }
     return <div id="selectors">{selectors}</div>
 }
@@ -462,18 +491,176 @@ const Trainer = (props) => {
     return <div id="trainer">
         {elms}
         </div>
-}
+};
+
+const Menu = (props) => {
+    const resetAll = () => {
+        props.appInfo.setSelectorNumber(2);
+        props.images.forEach((i) => {
+            i[1](null);
+        };
+    };
+
+    const loadFromFile = () => {
+        if (!(window.FileList && window.FileReader && window.Blob)) {
+            alert("The File APIs are not supported in your browser.");
+            return;
+        }
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.addEventListener("change", (e) => {
+            const files = e.target.files;
+            if (files.length < 1) {
+                return;
+            }
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const buffer = e.target.result;
+                const labels_num = (new Uint32Array(buffer, 0, 1))[0];
+                if (labels_num > MAX_LABELS) {
+                    alert("This file contains too many labels.");
+                    return;
+                }
+                const sectionLengths = new Uint32Array(buffer, 1*4, labels_num);
+                const tensors = [];
+                const imageData = [];
+                let cursor = (labels_num + 1)*4;
+                for (let i = 0; i < labels_num; i++) {
+                    if (sectionLengths[i] > 0) {
+                        if (sectionLengths[i] % 4 != 0) {
+                            alert("This file header contains invalid record size");
+                            return;
+                        }
+                        const fnum = sectionLengths[i] / 4;
+                        if (fnum % (7 * 7 * 256) != 0) {
+                            alert("This file header contains invalid record size");
+                            return;
+                        }
+                        const buf = new Float32Array(buffer, cursor, fnum);
+                        cursor += sectionLengths[i];
+                        const sampleNum = fnum / (7 * 7 * 256);
+                        tensors.push(tf.tensor4d(buf, [sampleNum, 7, 7, 256]));
+                    } else {
+                        tensors.push(null);
+                    }
+                }
+                const sampleImagesLengths = new Uint32Array(buffer, cursor, labels_num);
+                cursor += labels_num * 4;
+                for (let i = 0; i < labels_num; i++) {
+                    if (sampleImagesLengths[i] > 0) {
+                        const buff = new Uint8ClampedArray(buffer, cursor, sampleImagesLengths[i]);
+                        const imgData = new ImageData(IMAGE_SIZE, IMAGE_SIZE);
+                        for (let j = 0; j < buff.length; j++) {
+                            imgData.data[j] = buff[j];
+                        }
+                        cursor += sampleImagesLengths[i];
+                        imageData.push(imgData);
+                    } else {
+                        imageData.push(null);
+                    }
+                }
+                props.appInfo.setSelectorNumber(labels_num);
+                for (let i = 0; i < labels_num; i++) {
+                    props.images[i][1](tensors[i]);
+                }
+                for (let i = 0; i < labels_num; i++) {
+                    props.appInfo.sampleImages[i][1](imageData[i]);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+        fileInput.click();
+    };
+
+    const saveToFile = () => {
+        const blobs = [];
+        const header = new Uint32Array(props.appInfo.selectorNumber+1);
+        header[0] = props.appInfo.selectorNumber;
+        let totalBytes = 0;
+        const tensorBlobs = [];
+        for (let i = 0; i < props.appInfo.selectorNumber; i++) {
+            if (props.images[i][0]){
+                const t = props.images[i][0].dataSync();
+                const b = new Blob([t.buffer.slice(t.byteOffset, t.byteOffset + t.byteLength]);
+                header[i+1] = b.size;
+                totalBytes += b.size;
+                tensorBlobs.push(b);
+            } else {
+                header[i+1] = 0;
+            }
+        }
+        if (totalBytes == 0) {
+            return;
+        }
+        blobs.push(new Blob([header]));
+        tensorBlobs.forEach((b) => blobs.push(b));
+        const sampleImagesHeader = new Uint32Array(props.appInfo.selectorNumber);
+        const sampleImages = [];
+        for (let i = 0; i < props.appInfo.selectorNumber; i++) {
+            const simage = props.appInfo.sampleImages[i][0];
+            if (simage) {
+                const b = new Blob([simage.data]);
+                sampleImagesHeader[i] = b.size;
+                sampleImages.push(b);
+            } else {
+                saimpleImagesHeader[i] = 0;
+            }
+        }
+        blobs.push(new Blob([sampleImagesHeader]));
+        sampleImages.forEach((b) => blobs.push(b));
+        const totalBlob = new Blob(blobs, {type: "application/octet-stream"});
+        const blobURL = URL.createObjectURL(totalBlob);
+        const anchor = document.createElement("a");
+        anchor.href = blobURL;
+        anchor.target = "_blank";
+        anchor.download = "ImageData.dat"
+        anchor.click();
+    };
+
+    return <div className="menu">
+        <button id="menu-button" className="mdl-button mdl-js-button mdl-button--icon">
+            <i className="material-icons">menu</i>
+        </button>
+        <ul className="mdl-menu mdl-menu--bottom-left mdl-js-menu" htmlFor="menu-button" >
+            <li className="mdl-menun__item menu-item" ><div onClick={resetAll} >Reset</div></li>
+            <li className="mdl-menun__item menu-item" ><div onClick={loadFromFile} >Load from file</div></li>
+            <li className="mdl-menun__item menu-item" ><div onClick={saveToFile} >Save to file</div></li>
+        </ul>
+        </div>
+};
 
 const Main = (props) => {
+    const [predicted, setPredicted] = useState(null);
+    const [videoFlag, setVideoFlag] = useState(true);
+
+    const webcamRef = useRef(null);
+
+    if (props.mobileNet) {
+        return <div className="main">
+                <WebCam webcamRef={webcamRef} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
+                <Selectors webcamRef={webcamRef} mobileNet={props.mobileNet} images={props.images} predicted={predicted} appInfo={props.appInfo} />
+                <Trainer images={props.images} mobileNet={props.mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
+            </div>
+    } else {
+        return <div className="main"><span className="loading-message">Loading models...</spam></div>
+    }
+};
+
+const Application = () => {
+    const [mobileNet, setMobileNet] = useState(null);
+
     const images = [];
     for ( let i = 0; i < MAX_LABELS; i++) {
         images.push(useState(null));
     }
 
-    const [predicted, setPredicted] = useState(null);
-    const [videoFlag, setVideoFlag] = useState(true);
+    const sampleImages = [];
+    for ( let i = 0; i < MAX_LABELS; i++) {
+        sampleImages.push(useState(null));
+    }
 
-    const webcamRef = useRef(null);
+    const [ selectorNumber, setSelectorNumber ] = useState(2);
 
     for ( let i = 0; i < MAX_LABELS; i++ ) {
         useEffect(() => {
@@ -485,19 +672,7 @@ const Main = (props) => {
         }, [images[i][0]]);
     }
 
-    if (props.mobileNet) {
-        return <div className="main">
-                <WebCam webcamRef={webcamRef} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
-                <Selectors webcamRef={webcamRef} mobileNet={props.mobileNet} images={images} predicted={predicted} />
-                <Trainer images={images} mobileNet={props.mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
-            </div>
-    } else {
-        return <div className="main"><span className="loading-message">Loading models...</spam></div>
-    }
-}
-
-const Application = () => {
-    const [mobileNet, setMobileNet] = useState(null);
+    const appInfo = new AppInfo(selectorNumber, setSelectorNumber, sampleImages);
 
     useEffect(() => {
         let rootNet = null;
@@ -521,8 +696,12 @@ const Application = () => {
         };
     }, []);
 
-    return <div className="root"><Header /><Main mobileNet={mobileNet} /></div>;
-}
+    return <div className="root">
+            <Header />
+            <Menu images={images} appInfo={appInfo} />
+            <Main mobileNet={mobileNet} images={images} appInfo={appInfo} />
+        </div>;
+};
 
 ReactDOM.render(<Application />, document.getElementById('app'));
 

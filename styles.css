@@ -49,6 +49,21 @@ header {
   z-index: 20;
 }
 
+.menu {
+  z-index: 100;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+#menu-button {
+  z-index: 100;
+}
+
+.menu-item {
+  padding: 10px;
+  padding-bottom: 0px;
+}
+
 .main {
   position: relative;
   top: 340px;
