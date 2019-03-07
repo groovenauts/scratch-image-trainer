@@ -105,6 +105,13 @@ video.webcam {
   overflow: hidden;
 }
 
+.add-selector-cell {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin: 10px;
+}
+
 .selector-cell {
   display: flex;
   flex-direction: column;

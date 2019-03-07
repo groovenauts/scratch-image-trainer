@@ -222,17 +222,30 @@ const Selector = (props) => {
               <i className="material-icons">add_a_photo</i> }
         </button>
     </div>;
-}
+};
+
+const AddSelector = (props) => {
+    return <div className="add-selector-cell" onClick={props.incrementSelector} >
+        <button className="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+            <i className="material-icons">add</i>
+        </button>
+    </div>;
+};
 
 const Selectors = (props) => {
+    const [ selectorNumber, setSelectorNumber ] = useState(2);
+
     let selectors = [];
 
     useEffect(() => {
         componentHandler.upgradeAllRegistered();
-    }, []);
+    }, props.images.map((e) => e[0]));
 
-    for (let i = 0; i < MAX_LABELS; i++) {
+    for (let i = 0; i < selectorNumber; i++) {
         selectors.push(<Selector key={i} index={i} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} mobileNet={props.mobileNet} />);
+    }
+    if ( selectorNumber < MAX_LABELS ) {
+        selectors.push(<AddSelector key="addSelector" index={selectorNumber} incrementSelector={() => setSelectorNumber(selectorNumber+1)} />);
     }
     return <div id="selectors">{selectors}</div>
 }
