@@ -109,11 +109,16 @@ const WebCam = (props) => {
         }
     }
 
-    return <div className="webcam-continer">
+    return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
             <video autoPlay playsInline muted className="webcam" width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} onClick={onClick} ></video>
           </div>
+        <div className="webcam-controller">
+          { props.videoFlag ?
+              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={() => props.setVideoFlag(false) } ><i className="material-icons">pause</i></button> :
+              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={() => props.setVideoFlag(true) } ><i className="material-icons">play_circle_outline</i></button>}
+        </div>
         </div>
       </div>
 }
@@ -492,7 +497,6 @@ const Main = (props) => {
 }
 
 const Application = () => {
-    const [ started, setStarted ] = useState(false);
     const [mobileNet, setMobileNet] = useState(null);
 
     useEffect(() => {
@@ -517,11 +521,7 @@ const Application = () => {
         };
     }, []);
 
-    if ( started ) {
-        return <div className="root"><Header onClick={() => setStarted(false)} /><Main mobileNet={mobileNet} /></div>;
-    } else {
-        return <div className="root"><Header onClick={() => setStarted(true)} /></div>;
-    }
+    return <div className="root"><Header /><Main mobileNet={mobileNet} /></div>;
 }
 
 ReactDOM.render(<Application />, document.getElementById('app'));
