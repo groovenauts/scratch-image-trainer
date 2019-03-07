@@ -172,24 +172,35 @@ function drawCanvas(image, canvasRef) {
 }
 
 const Selector = (props) => {
+    const [capturing, setCapturing] = useState(false);
     const canvasRef = useRef();
 
     const [tensors, setTensors] = props.imageState;
 
-    let handleAddClick = (e) => {
-        const image = capture(props.webcamRef);
-        drawCanvas(image, canvasRef.current);
-        const embedding = tf.tidy(() => props.mobileNet.predict([image]));
-        image.dispose();
-        if (tensors == null) {
-            setTensors(embedding);
-        } else {
-            // previous tensor will disposed via useEffect() cleanup in Main components.
-            const newTensors = tf.tidy(() => tf.concat([tensors, embedding], 0));
-            embedding.dispose();
-            setTensors(newTensors);
+    useEffect(() => {
+        const addSample = () => {
+            const image = capture(props.webcamRef);
+            drawCanvas(image, canvasRef.current);
+            const embedding = tf.tidy(() => props.mobileNet.predict([image]));
+            image.dispose();
+            if (tensors == null) {
+                setTensors(embedding);
+            } else {
+                // previous tensor will disposed via useEffect() cleanup in Main components.
+                const newTensors = tf.tidy(() => tf.concat([tensors, embedding], 0));
+                embedding.dispose();
+                setTensors(newTensors);
+            }
         }
-    };
+
+        if (capturing) {
+            setTimeout(addSample, 200);
+        }
+    }, [capturing, tensors]);
+
+    const toggleCapturing = () => {
+        setCapturing(!capturing);
+    }
 
     const badge;
     if (tensors == null) {
@@ -205,8 +216,10 @@ const Selector = (props) => {
         <div className="mdl-badge mdl-badge--overlap" data-badge={badge} >
           <canvas className="selector-canvas" id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
-        <button className="capture-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" onClick={handleAddClick} >
-          <i className="material-icons">add_a_photo</i>
+        <button className="capture-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" onClick={toggleCapturing} >
+          { capturing ?
+              <i className="material-icons">stop</i> :
+              <i className="material-icons">add_a_photo</i> }
         </button>
     </div>;
 }
