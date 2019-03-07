@@ -256,7 +256,7 @@ const Selectors = (props) => {
 }
 
 const Trainer = (props) => {
-    const [headNet, setHeadNet] = useState(null);
+    const [ headNet, setHeadNet ] = useState(null);
     const [ phase, setPhase ] = useState("init");
     const [ loss, setLoss ] = useState(null);
     const [ epoch, setEpoch ] = useState(0);
