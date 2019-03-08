@@ -106,6 +106,7 @@ header {
   justify-content: center;
   overflow: hidden;
   width: 224px;
+  height: 224px;
 }
 
 video.webcam {

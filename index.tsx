@@ -90,7 +90,7 @@ const WebCam = (props) => {
         if (aspectRatio >= 1) {
             newSize = [Math.ceil(IMAGE_SIZE * aspectRatio), IMAGE_SIZE];
         } else {
-            newSize = [IMAGE_SIZE, Math.ceil(IMAGE_SIZE * aspectRatio)];
+            newSize = [IMAGE_SIZE, Math.ceil(IMAGE_SIZE / aspectRatio)];
         }
         if (videoSize[0] !== newSize[0] || videoSize[1] !== newSize[1]) {
             setVideoSize(newSize);
@@ -137,10 +137,10 @@ const WebCam = (props) => {
 
 function cropImage(img) {
     const size = Math.min(img.shape[0], img.shape[1]);
-    const centerHeight = img.shape[0] / 2;
-    const beginHeight = centerHeight - (size / 2);
-    const centerWidth = img.shape[1] / 2;
-    const beginWidth = centerWidth - (size / 2);
+    const centerHeight = Math.floor(img.shape[0] / 2);
+    const beginHeight = centerHeight - Math.floor(size / 2);
+    const centerWidth = Math.floor(img.shape[1] / 2);
+    const beginWidth = centerWidth - Math.floor(size / 2);
     return img.slice([beginHeight, beginWidth, 0], [size, size, 3]);
 }
 
