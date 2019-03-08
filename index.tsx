@@ -103,7 +103,7 @@ const WebCam = (props) => {
             navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
             navigatorAny.msGetUserMedia;
         if (props.videoFlag && navigator.getUserMedia) {
-            navigator.getUserMedia({video: true}, handleStream, () => null);
+            navigator.getUserMedia({video: {facingMode: "environment"}}, handleStream, () => null);
             return () => {
                 if (stopCallback) {
                     stopCallback();
