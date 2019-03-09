@@ -18,7 +18,7 @@
 import * as tf from '@tensorflow/tfjs';
 
 import formatMessage from "format-message";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useReducer } from 'react';
 import ReactDOM from 'react-dom';
 
 import fetch from 'node-fetch';
@@ -45,8 +45,8 @@ formatMessage.setup({
 
 const MAX_LABELS = 10;
 
-const Header = (props) => {
-    return <header onClick={props.onClick} >
+const Header = () => {
+    return <header>
         <div>{formatMessage({
                             id: "headerMessage",
                             default: "スクラッチに写真をおぼえさせよう!",
@@ -57,23 +57,18 @@ const Header = (props) => {
 
 const IMAGE_SIZE = 224;
 
-class AppInfo {
-    constructor(
-                public flipMode: boolean,
-                public setFlipMode: (x: boolean) => void,
-                public selectorNumber: number,
-                public setSelectorNumber: (s: number) => void,
-                public sampleImages: [(ImageData|null), ((ImageData|null)) => void][]
-    ){
-        this.flipMode = flipMode;
-        this.setFlipMode = setFlipMode;
-        this.selectorNumber = selectorNumber;
-        this.setSelectorNumber = setSelectorNumber;
-        this.sampleImages = sampleImages;
+class Action {
+    constructor(public type: string,
+                public data: any){
+        this.type = type;
+        this.data = data;
     }
-};
+}
 
 const WebCam = (props) => {
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
     const [ videoSize, setVideoSize ] = useState([320, 240]);
 
     let stopCallback = null;
@@ -106,7 +101,7 @@ const WebCam = (props) => {
         navigator.getUserMedia = navigator.getUserMedia ||
             navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
             navigatorAny.msGetUserMedia;
-        if (props.videoFlag && navigator.getUserMedia) {
+        if (appInfo.videoFlag && navigator.getUserMedia) {
             navigator.getUserMedia({video: {facingMode: "environment"}}, handleStream, () => null);
             return () => {
                 if (stopCallback) {
@@ -116,29 +111,26 @@ const WebCam = (props) => {
         } else {
             return;
         }
-    }, [props.videoFlag]);
-
-    let onClick = null;
-    if (!props.videoFlag) {
-        onClick = () => {
-            props.setVideoFlag(true)
-        }
-    }
+    }, [appInfo.videoFlag]);
 
     const webcamClassNames = [ "webcam" ];
-    if (props.appInfo.flipMode) {
+    if (appInfo.flipMode) {
         webcamClassNames.push("flip-image");
     }
+
+    const toggleVideoFlag = () => {
+        dispatch(new Action("setVideoFlag", !appInfo.videoFlag));
+    };
 
     return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
-            <video autoPlay playsInline muted className={webcamClassNames.join(" ")} width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} onClick={onClick} ></video>
+            <video autoPlay playsInline muted className={webcamClassNames.join(" ")} width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} ></video>
           </div>
         <div className="webcam-controller">
-          { props.videoFlag ?
-              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={() => props.setVideoFlag(false) } ><i className="material-icons">pause</i></button> :
-              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={() => props.setVideoFlag(true) } ><i className="material-icons">play_circle_filled</i></button>}
+          { appInfo.videoFlag ?
+              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={toggleVideoFlag} ><i className="material-icons">pause</i></button> :
+              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={toggleVideoFlag} ><i className="material-icons">play_circle_filled</i></button>}
         </div>
         </div>
       </div>
@@ -202,10 +194,13 @@ function drawCanvas(imageData, canvasRef) {
 }
 
 const Selector = (props) => {
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
+    const tensors = appInfo.tensors[props.index];
+
     const [capturing, setCapturing] = useState(false);
     const canvasRef = useRef();
-
-    const [tensors, setTensors] = props.imageState;
 
     useEffect(() => {
         if (props.imageData) {
@@ -217,16 +212,16 @@ const Selector = (props) => {
         const addSample = () => {
             const image = capture(props.webcamRef);
             const imData = convertToImageData(image);
-            props.setImageData(imData);
-            const embedding = tf.tidy(() => props.mobileNet.predict([image]));
+            dispatch(new Action("setSampleImage", { index: props.index, image: imData}));
+            const embedding = tf.tidy(() => appInfo.mobileNet.predict([image]));
             image.dispose();
             if (tensors == null) {
-                setTensors(embedding);
+                dispatch(new Action("setTensor", { index: props.index, tensor: embedding }));
             } else {
                 // previous tensor will disposed via useEffect() cleanup in Main components.
                 const newTensors = tf.tidy(() => tf.concat([tensors, embedding], 0));
                 embedding.dispose();
-                setTensors(newTensors);
+                dispatch(new Action("setTensor", { index: props.index, tensor: newTensors }));
             }
         }
 
@@ -237,7 +232,7 @@ const Selector = (props) => {
             if (tensors == null) {
                 tf.tidy(() => {
                     const image = tf.ones([1, 224, 224, 3]);
-                    props.setImageData(convertToImageData(image));
+                    dispatch(new Action("setSampleImage", { index: props.index, image: convertToImageData(image)}));
                 });
             }
         }
@@ -255,7 +250,7 @@ const Selector = (props) => {
     }
 
     const canvasClassNames = [ "selector-canvas" ];
-    if (props.appInfo.flipMode) {
+    if (appInfo.flipMode) {
         canvasClassNames.push("flip-image");
     }
 
@@ -275,7 +270,13 @@ const Selector = (props) => {
 };
 
 const AddSelector = (props) => {
-    return <div className="add-selector-cell" onClick={props.incrementSelector} >
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
+    const incrementSelector = () => {
+        dispatch(new Action("setSelectorNumber", appInfo.selectorNumber + 1));
+    };
+    return <div className="add-selector-cell" onClick={incrementSelector} >
         <button className="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
             <i className="material-icons">add</i>
         </button>
@@ -283,22 +284,28 @@ const AddSelector = (props) => {
 };
 
 const Selectors = (props) => {
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
     let selectors = [];
 
     useEffect(() => {
         componentHandler.upgradeAllRegistered();
-    }, props.images.map((e) => e[0]));
+    }, [appInfo.tensors.length]);
 
-    for (let i = 0; i < props.appInfo.selectorNumber; i++) {
-        selectors.push(<Selector key={i} index={i} appInfo={props.appInfo} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} mobileNet={props.mobileNet} imageData={props.appInfo.sampleImages[i][0]} setImageData={props.appInfo.sampleImages[i][1]} />);
+    for (let i = 0; i < appInfo.selectorNumber; i++) {
+        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} imageData={appInfo.sampleImages[i]} />);
     }
-    if ( props.appInfo.selectorNumber < MAX_LABELS ) {
-        selectors.push(<AddSelector key="addSelector" index={props.appInfo.selectorNumber} incrementSelector={() => props.appInfo.setSelectorNumber(props.appInfo.selectorNumber+1)} />);
+    if ( appInfo.selectorNumber < MAX_LABELS ) {
+        selectors.push(<AddSelector key="addSelector" index={appInfo.selectorNumber} appInfo={appInfo} dispatch={dispatch} />);
     }
     return <div id="selectors">{selectors}</div>
 }
 
 const Trainer = (props) => {
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
     const [ headNet, setHeadNet ] = useState(null);
     const [ phase, setPhase ] = useState("init");
     const [ loss, setLoss ] = useState(null);
@@ -314,17 +321,17 @@ const Trainer = (props) => {
         if (phase == "training" || phase == "uploading") {
             componentHandler.upgradeAllRegistered();
         }
-        if (phase == "done" || (phase == "uploaded" && props.videoFlag)) {
+        if ((phase == "done" || phase == "uploaded") && appInfo.videoFlag) {
             let running = true;
             const video = props.webcamRef;
             const fn = () => {
                 if (video && video.current) {
                     const image = capture(props.webcamRef);
                     const pred = tf.tidy(() => {
-                        const label = headNet.predict(props.mobileNet.predict(image)).as1D().argMax();
+                        const label = headNet.predict(appInfo.mobileNet.predict(image)).as1D().argMax();
                         return label;
                     });
-                    props.setPredicted(pred.dataSync()[0]);
+                    dispatch(new Action("setPredicted", pred.dataSync()[0]));
                     image.dispose();
                     pred.dispose();
                 }
@@ -348,7 +355,7 @@ const Trainer = (props) => {
             let xs = null;
             let ys = null;
             for ( let i = 0; i < MAX_LABELS; i++) {
-                const tensor = props.images[i][0];
+                const tensor = appInfo.tensors[i];
                 if (tensor) {
                     if (xs == null) {
                         xs = tf.clone(tensor);
@@ -464,7 +471,7 @@ const Trainer = (props) => {
         setTimeout(() => {
             headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
                 setPhase("uploaded");
-                props.setVideoFlag(false);
+                dispatch(new Action("setVideoFlag", false));
             });
         }, 10);
     }
@@ -508,11 +515,11 @@ const Trainer = (props) => {
 };
 
 const Menu = (props) => {
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
     const resetAll = () => {
-        props.appInfo.setSelectorNumber(2);
-        props.images.forEach((i) => {
-            i[1](null);
-        };
+        dispatch(new Action("resetAll"));
     };
 
     const loadFromFile = () => {
@@ -574,13 +581,11 @@ const Menu = (props) => {
                         imageData.push(null);
                     }
                 }
-                props.appInfo.setSelectorNumber(labels_num);
-                for (let i = 0; i < labels_num; i++) {
-                    props.images[i][1](tensors[i]);
-                }
-                for (let i = 0; i < labels_num; i++) {
-                    props.appInfo.sampleImages[i][1](imageData[i]);
-                }
+                dispatch(new Action("loadData", {
+                    selectorNumber: labels_num,
+                    tensors: tensors,
+                    sampleImages: imageData
+                });
             };
             reader.readAsArrayBuffer(file);
         });
@@ -589,13 +594,13 @@ const Menu = (props) => {
 
     const saveToFile = () => {
         const blobs = [];
-        const header = new Uint32Array(props.appInfo.selectorNumber+1);
-        header[0] = props.appInfo.selectorNumber;
+        const header = new Uint32Array(appInfo.selectorNumber+1);
+        header[0] = appInfo.selectorNumber;
         let totalBytes = 0;
         const tensorBlobs = [];
-        for (let i = 0; i < props.appInfo.selectorNumber; i++) {
-            if (props.images[i][0]){
-                const t = props.images[i][0].dataSync();
+        for (let i = 0; i < appInfo.selectorNumber; i++) {
+            if (appInfo.tensors[i]){
+                const t = appInfo.tensors[i].dataSync();
                 const b = new Blob([t.buffer.slice(t.byteOffset, t.byteOffset + t.byteLength]);
                 header[i+1] = b.size;
                 totalBytes += b.size;
@@ -609,16 +614,16 @@ const Menu = (props) => {
         }
         blobs.push(new Blob([header]));
         tensorBlobs.forEach((b) => blobs.push(b));
-        const sampleImagesHeader = new Uint32Array(props.appInfo.selectorNumber);
+        const sampleImagesHeader = new Uint32Array(appInfo.selectorNumber);
         const sampleImages = [];
-        for (let i = 0; i < props.appInfo.selectorNumber; i++) {
-            const simage = props.appInfo.sampleImages[i][0];
+        for (let i = 0; i < appInfo.selectorNumber; i++) {
+            const simage = appInfo.sampleImages[i];
             if (simage) {
                 const b = new Blob([simage.data]);
                 sampleImagesHeader[i] = b.size;
                 sampleImages.push(b);
             } else {
-                saimpleImagesHeader[i] = 0;
+                sampleImagesHeader[i] = 0;
             }
         }
         blobs.push(new Blob([sampleImagesHeader]));
@@ -633,7 +638,7 @@ const Menu = (props) => {
     };
 
     const toggleFlipMode = () => {
-        props.appInfo.setFlipMode(!props.appInfo.flipMode);
+        dispatch(new Action("setFlipMode", !appInfo.flipMode));
     };
 
     return <div className="menu">
@@ -650,64 +655,105 @@ const Menu = (props) => {
 };
 
 const Main = (props) => {
-    const [predicted, setPredicted] = useState(null);
-    const [videoFlag, setVideoFlag] = useState(true);
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
 
     const webcamRef = useRef(null);
 
-    if (props.mobileNet) {
+    if (appInfo.mobileNet) {
         return <div className="main">
-                <WebCam appInfo={props.appInfo} webcamRef={webcamRef} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
-                <Selectors webcamRef={webcamRef} mobileNet={props.mobileNet} images={props.images} predicted={predicted} appInfo={props.appInfo} />
-                <Trainer images={props.images} mobileNet={props.mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
+                <WebCam appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
+                <Selectors appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
+                <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
             </div>
     } else {
         return <div className="main"><span className="loading-message">Loading models...</spam></div>
     }
 };
 
-const Application = () => {
-    let defaultFlipMode = true;
-    // Assume that if the device has multiple camera devices, it could be smartphone and the backend camera will be used
-    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-        navigator.mediaDevices.enumerateDevices().then((info) => {
-            if (info.filter((d) => (d.kind == "videoinput")).length > 1) {
-                defaultFlipMode = false;
+function appReducer(appInfo, action) {
+    switch(action.type) {
+    case "setMobileNet":
+        return { ...appInfo, ...{ mobileNet: action.data } };
+    case "setTensor":
+        const newTensors = [];
+        for (let i = 0; i < MAX_LABELS; i++) {
+            if (i == action.data.index) {
+                newTensors[i] = action.data.tensor;
+            } else {
+                newTensors[i] = appInfo.tensors[i];
             }
-        });
+        }
+        return { ...appInfo, ...{ tensors: newTensors }};
+    case "setSampleImage":
+        const newSampleImages = [];
+        for (let i = 0; i < MAX_LABELS; i++) {
+            if (i == action.data.index) {
+                newSampleImages[i] = action.data.image;
+            } else {
+                newSampleImages[i] = appInfo.sampleImages[i];
+            }
+        }
+        return { ...appInfo, ...{ sampleImages: newSampleImages }};
+    case "setSelectorNumber":
+        return { ...appInfo, ...{ selectorNumber: action.data }};
+    case "setVideoFlag":
+        return { ...appInfo, ...{ videoFlag: action.data, predicted: (action.data) ? appInfo.predicted : null }};
+    case "setPredicted":
+        return { ...appInfo, ...{ predicted: appInfo.videoFlag ? action.data : null }};
+    case "setFlipMode":
+        return { ...appInfo, ...{ flipMode: action.data } };
+    case "resetAll":
+        return {
+            ...appInfo,
+            ...{
+                selectorNumber: 2,
+                tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
+                sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;})
+            }
+        };
+    case "loadData":
+        return { ...appInfo, ...action.data };
+    default:
+        return appInfo;
     }
+}
 
-    const [ flipMode, setFlipMode ] = useState(defaultFlipMode);
+const Application = () => {
+    const initialAppInfo = {
+        flipMode: true,
+        videoFlag: true,
+        selectorNumber: 2,
+        tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
+        sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
+        mobileNet: null
+    };
+    const [ appInfo, dispatch ] = useReducer(appReducer, initialAppInfo);
 
-    const [ mobileNet, setMobileNet ] = useState(null);
-
-    const images = [];
-    for ( let i = 0; i < MAX_LABELS; i++) {
-        images.push(useState(null));
-    }
-
-    const sampleImages = [];
-    for ( let i = 0; i < MAX_LABELS; i++) {
-        sampleImages.push(useState(null));
-    }
-
-    const [ selectorNumber, setSelectorNumber ] = useState(2);
+    // Assume that if the device has multiple camera devices, it could be smartphone and the backend camera will be used
+    useEffect(() => {
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices().then((info) => {
+                if (info.filter((d) => (d.kind == "videoinput")).length > 1) {
+                    dispatch(new Action("setFlipMode", false));
+                }
+            });
+        }
+    }, []);
 
     for ( let i = 0; i < MAX_LABELS; i++ ) {
         useEffect(() => {
             return () => {
-                if (images[i][0]) {
-                    images[i][0].dispose();
+                if (appInfo.tensors[i]) {
+                    appInfo.tensors[i].dispose();
                 }
             };
-        }, [images[i][0]]);
+        }, [appInfo.tensors[i]]);
     }
-
-    const appInfo = new AppInfo(flipMode, setFlipMode, selectorNumber, setSelectorNumber, sampleImages);
 
     useEffect(() => {
         let rootNet = null;
-        if (mobileNet == null) {
+        if (appInfo.mobileNet == null) {
             tf.loadLayersModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json').then(net => {
                 rootNet = net;
                 const layer = net.getLayer('conv_pw_13_relu');
@@ -716,7 +762,7 @@ const Application = () => {
                 tf.tidy(() => {
                     truncatedNet.predict(tf.zeros([1, 224, 224, 3]));
                 });
-                setMobileNet(truncatedNet);
+                dispatch(new Action("setMobileNet", truncatedNet));
             });
         }
 
@@ -729,8 +775,8 @@ const Application = () => {
 
     return <div className="root">
             <Header />
-            <Menu images={images} appInfo={appInfo} />
-            <Main mobileNet={mobileNet} images={images} appInfo={appInfo} />
+            <Menu appInfo={appInfo} dispatch={dispatch} />
+            <Main appInfo={appInfo} dispatch={dispatch} />
         </div>;
 };
 
