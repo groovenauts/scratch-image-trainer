@@ -60,11 +60,13 @@ const IMAGE_SIZE = 224;
 class AppInfo {
     constructor(
                 public flipMode: boolean,
+                public setFlipMode: (x: boolean) => void,
                 public selectorNumber: number,
                 public setSelectorNumber: (s: number) => void,
                 public sampleImages: [(ImageData|null), ((ImageData|null)) => void][]
     ){
         this.flipMode = flipMode;
+        this.setFlipMode = setFlipMode;
         this.selectorNumber = selectorNumber;
         this.setSelectorNumber = setSelectorNumber;
         this.sampleImages = sampleImages;
@@ -630,14 +632,19 @@ const Menu = (props) => {
         anchor.click();
     };
 
+    const toggleFlipMode = () => {
+        props.appInfo.setFlipMode(!props.appInfo.flipMode);
+    };
+
     return <div className="menu">
         <button id="menu-button" className="mdl-button mdl-js-button mdl-button--icon">
             <i className="material-icons">menu</i>
         </button>
         <ul className="mdl-menu mdl-menu--bottom-left mdl-js-menu" htmlFor="menu-button" >
-            <li className="mdl-menun__item menu-item" ><div onClick={resetAll} >Reset</div></li>
-            <li className="mdl-menun__item menu-item" ><div onClick={loadFromFile} >Load from file</div></li>
-            <li className="mdl-menun__item menu-item" ><div onClick={saveToFile} >Save to file</div></li>
+            <li className="mdl-menu__item menu-item mdl-menu__item--full-bleed-divider" onClick={toggleFlipMode}>Flip Image</li>
+            <li className="mdl-menu__item menu-item" onClick={resetAll} >Reset</li>
+            <li className="mdl-menu__item menu-item" onClick={loadFromFile} >Load from file</li>
+            <li className="mdl-menu__item menu-item" onClick={saveToFile} >Save to file</li>
         </ul>
         </div>
 };
@@ -696,7 +703,7 @@ const Application = () => {
         }, [images[i][0]]);
     }
 
-    const appInfo = new AppInfo(flipMode, selectorNumber, setSelectorNumber, sampleImages);
+    const appInfo = new AppInfo(flipMode, setFlipMode, selectorNumber, setSelectorNumber, sampleImages);
 
     useEffect(() => {
         let rootNet = null;
