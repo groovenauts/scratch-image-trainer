@@ -50,18 +50,13 @@ header {
 }
 
 .menu {
+  position: fixed;
   z-index: 100;
-  margin-top: 10px;
   margin-left: 10px;
 }
 
 #menu-button {
   z-index: 100;
-}
-
-.menu-item {
-  padding: 10px;
-  padding-bottom: 0px;
 }
 
 .main {
