@@ -110,7 +110,6 @@ header {
 }
 
 video.webcam {
-  transform: scaleX(-1);
 }
 
 .webcam-controller {
@@ -160,6 +159,9 @@ video.webcam {
   position: relative;
   border: 1px solid #454545;
   border-radius: 4px;
+}
+
+.flip-image {
   transform: scaleX(-1);
 }
 

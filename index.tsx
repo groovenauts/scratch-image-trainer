@@ -59,10 +59,12 @@ const IMAGE_SIZE = 224;
 
 class AppInfo {
     constructor(
+                public flipMode: boolean,
                 public selectorNumber: number,
                 public setSelectorNumber: (s: number) => void,
                 public sampleImages: [(ImageData|null), ((ImageData|null)) => void][]
     ){
+        this.flipMode = flipMode;
         this.selectorNumber = selectorNumber;
         this.setSelectorNumber = setSelectorNumber;
         this.sampleImages = sampleImages;
@@ -121,10 +123,15 @@ const WebCam = (props) => {
         }
     }
 
+    const webcamClassNames = [ "webcam" ];
+    if (props.appInfo.flipMode) {
+        webcamClassNames.push("flip-image");
+    }
+
     return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
-            <video autoPlay playsInline muted className="webcam" width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} onClick={onClick} ></video>
+            <video autoPlay playsInline muted className={webcamClassNames.join(" ")} width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} onClick={onClick} ></video>
           </div>
         <div className="webcam-controller">
           { props.videoFlag ?
@@ -245,12 +252,17 @@ const Selector = (props) => {
         badge = tensors.shape[0];
     }
 
+    const canvasClassNames = [ "selector-canvas" ];
+    if (props.appInfo.flipMode) {
+        canvasClassNames.push("flip-image");
+    }
+
     return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "")} >
         <div className="selector-label" >
           <span className="mdl-chip" ><span className="mdl-chip__text">{ props.index + 1 }</span></span>
         </div>
         <div className="mdl-badge mdl-badge--overlap" data-badge={badge} >
-          <canvas className="selector-canvas" id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
+          <canvas className={canvasClassNames.join(" ")} id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
         <button className="capture-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" onClick={toggleCapturing} >
           { capturing ?
@@ -276,7 +288,7 @@ const Selectors = (props) => {
     }, props.images.map((e) => e[0]));
 
     for (let i = 0; i < props.appInfo.selectorNumber; i++) {
-        selectors.push(<Selector key={i} index={i} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} mobileNet={props.mobileNet} imageData={props.appInfo.sampleImages[i][0]} setImageData={props.appInfo.sampleImages[i][1]} />);
+        selectors.push(<Selector key={i} index={i} appInfo={props.appInfo} webcamRef={props.webcamRef} imageState={props.images[i]} isPredicted={i == props.predicted} mobileNet={props.mobileNet} imageData={props.appInfo.sampleImages[i][0]} setImageData={props.appInfo.sampleImages[i][1]} />);
     }
     if ( props.appInfo.selectorNumber < MAX_LABELS ) {
         selectors.push(<AddSelector key="addSelector" index={props.appInfo.selectorNumber} incrementSelector={() => props.appInfo.setSelectorNumber(props.appInfo.selectorNumber+1)} />);
@@ -638,7 +650,7 @@ const Main = (props) => {
 
     if (props.mobileNet) {
         return <div className="main">
-                <WebCam webcamRef={webcamRef} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
+                <WebCam appInfo={props.appInfo} webcamRef={webcamRef} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
                 <Selectors webcamRef={webcamRef} mobileNet={props.mobileNet} images={props.images} predicted={predicted} appInfo={props.appInfo} />
                 <Trainer images={props.images} mobileNet={props.mobileNet} webcamRef={webcamRef} setPredicted={setPredicted} videoFlag={videoFlag} setVideoFlag={setVideoFlag} />
             </div>
@@ -648,7 +660,19 @@ const Main = (props) => {
 };
 
 const Application = () => {
-    const [mobileNet, setMobileNet] = useState(null);
+    let defaultFlipMode = true;
+    // Assume that if the device has multiple camera devices, it could be smartphone and the backend camera will be used
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        navigator.mediaDevices.enumerateDevices().then((info) => {
+            if (info.filter((d) => (d.kind == "videoinput")).length > 1) {
+                defaultFlipMode = false;
+            }
+        });
+    }
+
+    const [ flipMode, setFlipMode ] = useState(defaultFlipMode);
+
+    const [ mobileNet, setMobileNet ] = useState(null);
 
     const images = [];
     for ( let i = 0; i < MAX_LABELS; i++) {
@@ -672,7 +696,7 @@ const Application = () => {
         }, [images[i][0]]);
     }
 
-    const appInfo = new AppInfo(selectorNumber, setSelectorNumber, sampleImages);
+    const appInfo = new AppInfo(flipMode, selectorNumber, setSelectorNumber, sampleImages);
 
     useEffect(() => {
         let rootNet = null;
