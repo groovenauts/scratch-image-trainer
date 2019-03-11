@@ -305,9 +305,8 @@ const Selectors = (props) => {
 const Trainer = (props) => {
     const appInfo = props.appInfo;
     const dispatch = props.dispatch;
+    const phase = appInfo.phase;
 
-    const [ headNet, setHeadNet ] = useState(null);
-    const [ phase, setPhase ] = useState("init");
     const [ loss, setLoss ] = useState(null);
     const [ epoch, setEpoch ] = useState(0);
     const [ modelKey, setModelKey ] = useState(null);
@@ -328,7 +327,7 @@ const Trainer = (props) => {
                 if (video && video.current) {
                     const image = capture(props.webcamRef);
                     const pred = tf.tidy(() => {
-                        const label = headNet.predict(appInfo.mobileNet.predict(image)).as1D().argMax();
+                        const label = appInfo.headNet.predict(appInfo.mobileNet.predict(image)).as1D().argMax();
                         return label;
                     });
                     dispatch(new Action("setPredicted", pred.dataSync()[0]));
@@ -348,7 +347,7 @@ const Trainer = (props) => {
     });
 
     function train() {
-        setPhase("training");
+        dispatch(new Action("setPhase", "training"));
 
         setTimeout(() => {
             /* setup image dataset */
@@ -374,7 +373,7 @@ const Trainer = (props) => {
             }
 
             if (xs == null){
-                setPhase("init");
+                dispatch(new Action("setPhase", "init"));
                 return
             }
 
@@ -411,9 +410,8 @@ const Trainer = (props) => {
                 xs.dispose();
                 ys.dispose();
                 optimizer.dispose();
-                if (headNet) { headNet.dispose();}
-                setHeadNet(net);
-                setPhase("done");
+                dispatch(new Action("setHeadNet", net));
+                dispatch(new Action("setPhase", "done"));
             });
         }, 10);
     }
@@ -454,7 +452,7 @@ const Trainer = (props) => {
                         .then(res => resolve())
                         .catch(error => {
                             console.log("POST model failed(" + filename + "): " + error)
-                            setPhase("done");
+                            dispatch(new Action("setPhase", "done"));
                             reject();
                         });
                 });
@@ -467,11 +465,11 @@ const Trainer = (props) => {
             await upload(dir + "/model.json", btoa(json));
             setModelKey(id);
         }
-        setPhase("uploading");
+        dispatch("setPhase", "uploading"));
         setTimeout(() => {
-            headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
-                setPhase("uploaded");
+            appInfo.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
                 dispatch(new Action("setVideoFlag", false));
+                dispatch(new Action("setPhase", "uploaded"));
             });
         }, 10);
     }
@@ -675,6 +673,13 @@ function appReducer(appInfo, action) {
     switch(action.type) {
     case "setMobileNet":
         return { ...appInfo, ...{ mobileNet: action.data } };
+    case "setHeadNet":
+        if (appInfo.headNet) {
+            appInfo.headNet.dispose();
+        }
+        return { ...appInfo, ...{ headNet: action.data } };
+    case "setPhase":
+        return { ...appInfo, ...{ phase: action.data } };
     case "setTensor":
         const newTensors = [];
         for (let i = 0; i < MAX_LABELS; i++) {
@@ -707,9 +712,12 @@ function appReducer(appInfo, action) {
         return {
             ...appInfo,
             ...{
+                phase: "init",
                 selectorNumber: 2,
                 tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
-                sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;})
+                sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
+                predicted: null,
+                headNet: null
             }
         };
     case "loadData":
@@ -721,12 +729,14 @@ function appReducer(appInfo, action) {
 
 const Application = () => {
     const initialAppInfo = {
+        phase: "init",
         flipMode: true,
         videoFlag: true,
         selectorNumber: 2,
         tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
-        mobileNet: null
+        mobileNet: null,
+        headNet: null
     };
     const [ appInfo, dispatch ] = useReducer(appReducer, initialAppInfo);
 
