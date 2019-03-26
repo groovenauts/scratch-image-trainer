@@ -178,7 +178,11 @@ video.webcam {
   justify-content: center;
 }
 
-.training-spinner {
+.training-progress-bar {
+  margin: 6px;
+}
+
+.uploading-spinner {
   margin: 6px;
 }
 

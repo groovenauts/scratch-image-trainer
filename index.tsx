@@ -307,13 +307,15 @@ const Trainer = (props) => {
     const dispatch = props.dispatch;
     const phase = appInfo.phase;
 
-    const [ loss, setLoss ] = useState(null);
-    const [ epoch, setEpoch ] = useState(0);
     const [ modelKey, setModelKey ] = useState(null);
 
+    const progressRef = useRef(null);
+
     async function epochCallback(e, logs) {
-        setLoss(logs.loss.toFixed(5));
-        setEpoch(e+1);
+        console.log(`Epoch: ${e} Loss: ${logs.loss.toFixed(5)}`);
+        if (progressRef.current) {
+            progressRef.current.MaterialProgress.setProgress(e*2);
+        }
     }
 
     useEffect(() => {
@@ -486,14 +488,11 @@ const Trainer = (props) => {
                   })}
                   </button></div>);
     }
-    if (phase == "training" || phase == "uploading") {
-        elms.push(<div key="spinner" className="training-spinner"><div className="mdl-spinner mdl-js-spinner is-active"></div></div>);
-    }
     if (phase == "training") {
-        elms.push(<div key="epoch" >Epoch: {epoch}</div>);
+        elms.push(<div key="progress-bar" className="training-progress-bar"><div className="mdl-progress mdl-js-progress" ref={progressRef} ></div></div>);
     }
-    if (phase == "training" || phase == "done" || phase == "uploading" || phase == "uploaded") {
-        elms.push(<div key="loss" >Loss: {loss}</div>);
+    if (phase == "uploading") {
+        elms.push(<div key="spinner" className="uploading-spinner"><div className="mdl-spinner mdl-js-spinner is-active"></div></div>);
     }
     if (phase == "done") {
         elms.push(<div key="save-button" >
