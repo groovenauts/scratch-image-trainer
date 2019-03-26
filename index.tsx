@@ -413,7 +413,7 @@ const Trainer = (props) => {
                 dispatch(new Action("setHeadNet", net));
                 dispatch(new Action("setPhase", "done"));
             });
-        }, 10);
+        }, 200);
     }
 
     function save() {
@@ -465,13 +465,14 @@ const Trainer = (props) => {
             await upload(dir + "/model.json", btoa(json));
             setModelKey(id);
         }
+        dispatch(new Action("setVideoFlag", false));
         dispatch(new Action("setPhase", "uploading"));
         setTimeout(() => {
             appInfo.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
                 dispatch(new Action("setVideoFlag", false));
                 dispatch(new Action("setPhase", "uploaded"));
             });
-        }, 10);
+        }, 200);
     }
 
     const elms = [];
@@ -488,8 +489,10 @@ const Trainer = (props) => {
     if (phase == "training" || phase == "uploading") {
         elms.push(<div key="spinner" className="training-spinner"><div className="mdl-spinner mdl-js-spinner is-active"></div></div>);
     }
-    if (phase == "training" || phase == "done" || phase == "uploading" || phase == "uploaded") {
+    if (phase == "training") {
         elms.push(<div key="epoch" >Epoch: {epoch}</div>);
+    }
+    if (phase == "training" || phase == "done" || phase == "uploading" || phase == "uploaded") {
         elms.push(<div key="loss" >Loss: {loss}</div>);
     }
     if (phase == "done") {
