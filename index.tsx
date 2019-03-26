@@ -465,7 +465,7 @@ const Trainer = (props) => {
             await upload(dir + "/model.json", btoa(json));
             setModelKey(id);
         }
-        dispatch("setPhase", "uploading"));
+        dispatch(new Action("setPhase", "uploading"));
         setTimeout(() => {
             appInfo.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
                 dispatch(new Action("setVideoFlag", false));
@@ -669,7 +669,7 @@ const Main = (props) => {
     }
 };
 
-function appReducer(appInfo, action) {
+function appReducer(appInfo: any, action: Action) {
     switch(action.type) {
     case "setMobileNet":
         return { ...appInfo, ...{ mobileNet: action.data } };
