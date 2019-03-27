@@ -15,8 +15,6 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs';
-
 import fetch from 'fetch';
 
 const postURL = "https://scratch-image-model-dot-ai-for-edu.appspot.com/models";
