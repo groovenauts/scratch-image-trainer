@@ -17,57 +17,57 @@
 
 import fetch from 'fetch';
 
-const postURL = "https://scratch-image-model-dot-ai-for-edu.appspot.com/models";
+export default function modelSaveHandler(postURL) {
+    return async function (artifacts) {
+        const weightBlob = new Blob([artifacts.weightData], { type: "application/octet-stream"} );
+        const spec = {
+            "modelTopology": artifacts.modelTopology,
+            "weightsManifest": [
+                {
+                    "paths": ["weights.bin"],
+                    "weights": artifacts.weightSpecs
+                }
+            ]
+        };
+        const json = JSON.stringify(spec);
 
-export default async function handlerModelSave(artifacts) {
-    const weightBlob = new Blob([artifacts.weightData], { type: "application/octet-stream"} );
-    const spec = {
-        "modelTopology": artifacts.modelTopology,
-        "weightsManifest": [
-            {
-                "paths": ["weights.bin"],
-                "weights": artifacts.weightSpecs
-            }
-        ]
+        function assignKey() {
+            return new Promise((resolve, reject) => {
+                window.fetch(postURL, { method: "POST", body: "" })
+                    .then(res => {
+                        return res.json()
+                    })
+                    .then(body => {
+                        resolve(body)
+                    })
+                    .catch(error => {
+                        console.log("POST model failed: "+ error)
+                        reject(error);
+                    });
+            });
+        }
+
+        function upload(signedUrl, contentType, content) {
+            return new Promise((resolve, reject) => {
+                window.fetch(signedUrl, {body: content, method: "PUT", headers: { "Content-Type": contentType } })
+                    .then(res => resolve())
+                    .catch(error => {
+                        console.log("PUT object via Signed URL failed: " + error)
+                        reject(error);
+                    });
+            });
+        }
+
+        const res = await assignKey();
+        if (!res.success) {
+            console.log("Failed to get unique key and Signed URLs for model uploads: " + res)
+            return
+        }
+        await upload(res.weightsUrl, "application/octet-stream" weightBlob)
+        await upload(res.modelUrl, "application/json", json)
+
+        return res.key;
     };
-    const json = JSON.stringify(spec);
-
-    function assignKey() {
-        return new Promise((resolve, reject) => {
-            window.fetch(postURL, { method: "POST", body: "" })
-                .then(res => {
-                    return res.json()
-                })
-                .then(body => {
-                    resolve(body)
-                })
-                .catch(error => {
-                    console.log("POST model failed: "+ error)
-                    reject(error);
-                });
-        });
-    }
-
-    function upload(signedUrl, contentType, content) {
-        return new Promise((resolve, reject) => {
-            window.fetch(signedUrl, {body: content, method: "PUT", headers: { "Content-Type": contentType } })
-                .then(res => resolve())
-                .catch(error => {
-                    console.log("PUT object via Signed URL failed: " + error)
-                    reject(error);
-                });
-        });
-    }
-
-    const res = await assignKey();
-    if (!res.success) {
-        console.log("Failed to get unique key and Signed URLs for model uploads: " + res)
-        return
-    }
-    await upload(res.weightsUrl, "application/octet-stream" weightBlob)
-    await upload(res.modelUrl, "application/json", json)
-
-    return res.key;
 }
 
 // vim:ft=javascript sw=4

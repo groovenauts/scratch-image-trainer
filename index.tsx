@@ -21,7 +21,9 @@ import formatMessage from "format-message";
 import React, { useState, useEffect, useRef, useReducer } from 'react';
 import ReactDOM from 'react-dom';
 
-import handleModelSave from "./modelSave";
+import modelSaveHandler from "./modelSave";
+
+const postURL = "https://scratch-image-model-dot-ai-for-edu.appspot.com/models";
 
 let translations = {
   "ja": {
@@ -423,7 +425,7 @@ const Trainer = (props) => {
         dispatch(new Action("setVideoFlag", false));
         dispatch(new Action("setPhase", "uploading"));
         setTimeout(() => {
-            appInfo.headNet.save(tf.io.withSaveHandler(handleModelSave)).then((key) => {
+            appInfo.headNet.save(tf.io.withSaveHandler(modelSaveHandler(postURL))).then((key) => {
                 setModelKey(key)
                 dispatch(new Action("setVideoFlag", false));
                 dispatch(new Action("setPhase", "uploaded"));
