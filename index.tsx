@@ -21,10 +21,7 @@ import formatMessage from "format-message";
 import React, { useState, useEffect, useRef, useReducer } from 'react';
 import ReactDOM from 'react-dom';
 
-import fetch from 'node-fetch';
-
-const postURL = "https://magellan-file-webcamdata-dot-ai-for-edu.appspot.com/upload";
-const accessKey = process.env.UPLOAD_TOKEN;
+import handleModelSave from "./modelSave";
 
 let translations = {
   "ja": {
@@ -423,60 +420,16 @@ const Trainer = (props) => {
     }
 
     function save() {
-        async function handleSave(artifacts) {
-            const weightBlob = new Blob([artifacts.weightData], { type: "application/octet-stream"} );
-            const reader = new FileReader();
-            function fn() {
-                return new Promise((resolve, reject) => {
-                    reader.onerror = () => {
-                        reader.abort();
-                        reject(new DOMException("Can't load model weights binary."));
-                    };
-                    reader.onload = () => {
-                        resolve(reader.result);
-                    };
-                    reader.readAsDataURL(weightBlob);
-                });
-            }
-            const dataURL = await fn();
-            const b64 = dataURL.replace(/^[^,]*,/, "");
-            const spec = {
-                "modelTopology": artifacts.modelTopology,
-                "weightsManifest": [
-                    {
-                        "paths": ["weights.bin"],
-                        "weights": artifacts.weightSpecs
-                    }
-                ]
-            };
-            const json = JSON.stringify(spec);
-
-            function upload(filename, b64_content) {
-                return new Promise((resolve, reject) => {
-                    const req = "key=" + accessKey + "&filename=" + filename + "&content=" + b64_content.replace(/\+/g, "%2b");
-                    window.fetch(postURL, {headers: { "content-type": "application/x-www-form-urlencoded" }, body: req, method: "POST", mode: "no-cors" })
-                        .then(res => resolve())
-                        .catch(error => {
-                            console.log("POST model failed(" + filename + "): " + error)
-                            dispatch(new Action("setPhase", "done"));
-                            reject();
-                        });
-                });
-            }
-
-            const id = ("00000000" + Math.floor((Math.random()*10000000))).slice(-7);
-            const dir = "models/image-detection/v1/" + id;
-
-            await upload(dir + "/weights.bin", b64);
-            await upload(dir + "/model.json", btoa(json));
-            setModelKey(id);
-        }
         dispatch(new Action("setVideoFlag", false));
         dispatch(new Action("setPhase", "uploading"));
         setTimeout(() => {
-            appInfo.headNet.save(tf.io.withSaveHandler(handleSave)).then(() => {
+            appInfo.headNet.save(tf.io.withSaveHandler(handleModelSave)).then((key) => {
+                setModelKey(key)
                 dispatch(new Action("setVideoFlag", false));
                 dispatch(new Action("setPhase", "uploaded"));
+            }).catch(error => {
+                console.log("Failed to save model: " + error);
+                dispatch(new Action("setPhase", "done"));
             });
         }, 200);
     }
