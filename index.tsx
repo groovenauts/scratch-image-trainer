@@ -41,7 +41,7 @@ let translations = {
 };
 
 formatMessage.setup({
-    locale: "ja-JP",
+    locale: navigator.language,
     translations: translations,
     missingTranslation: "ignore",
 });
