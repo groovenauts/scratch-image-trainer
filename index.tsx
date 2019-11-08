@@ -621,11 +621,18 @@ const Main = (props) => {
     const webcamRef = useRef(null);
 
     if (appInfo.mobileNet) {
-        return <div className="main">
-                <WebCam appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
-                <Selectors appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
-                <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
-            </div>
+        if (appInfo.selectorNumber > 0) {
+            return <div className="main">
+                    <WebCam appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
+                    <Selectors appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
+                    <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
+                </div>
+        } else {
+            return <div className="main">
+                    <Selectors appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
+                    <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
+                </div>
+        }
     } else {
         return <div className="main"><span className="loading-message">Loading models...</spam></div>
     }
@@ -675,7 +682,7 @@ function appReducer(appInfo: any, action: Action) {
             ...appInfo,
             ...{
                 phase: "init",
-                selectorNumber: 2,
+                selectorNumber: 0,
                 tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
                 sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
                 predicted: null,
@@ -694,7 +701,7 @@ const Application = () => {
         phase: "init",
         flipMode: true,
         videoFlag: true,
-        selectorNumber: 2,
+        selectorNumber: 0,
         tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         mobileNet: null,
