@@ -23,7 +23,7 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
-  background: #fffde3;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
 }
 button:focus {
   outline: 0;
