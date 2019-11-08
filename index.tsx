@@ -439,18 +439,14 @@ const Trainer = (props) => {
 
     const elms = [];
 
-    if (phase == "init" || phase == "done" || phase == "uploaded") {
-        elms.push(<div key="train-button" ><button id="train-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={train} >
-                  {formatMessage({
-                                 id: "train",
-                                 default: "トレーニング",
-                                 description: "Text message on train button."
-                  })}
-                  </button></div>);
-    }
-    if (phase == "training") {
-        elms.push(<div key="progress-bar" className="training-progress-bar"><div className="mdl-progress mdl-js-progress" ref={progressRef} ></div></div>);
-    }
+    elms.push(<div key="train-button" ><button id="train-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={train} >
+              {formatMessage({
+                             id: "train",
+                             default: "トレーニング",
+                             description: "Text message on train button."
+              })}
+                <div key="progress-bar" className="training-progress-bar"><div className="mdl-progress mdl-js-progress" ref={progressRef} ></div></div>
+              </button></div>);
     if (phase == "uploading") {
         elms.push(<div key="spinner" className="uploading-spinner"><div className="mdl-spinner mdl-js-spinner is-active"></div></div>);
     }
