@@ -179,8 +179,13 @@ video.webcam {
 }
 
 .training-progress-bar {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  position: relative;
+  z-index: 999;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  height: 4px;
+  width: 100%;
+  top: -4px;
 }
 
 .uploading-spinner {
@@ -188,7 +193,9 @@ video.webcam {
 }
 
 #train-button {
-  margin: 10px;
+  margin: 0px;
+  padding: 0px;
+  border-radius: 0px;
 }
 
 #save-button {
