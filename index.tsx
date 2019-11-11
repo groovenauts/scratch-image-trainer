@@ -133,8 +133,10 @@ const WebCam = (props) => {
           </div>
         <div className="webcam-controller">
           { appInfo.videoFlag ?
-              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={toggleVideoFlag} ><i className="material-icons">pause</i></button> :
-              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onClick={toggleVideoFlag} ><i className="material-icons">play_circle_filled</i></button>}
+              <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam_off</i></button> :
+              <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam</i></button>}
+          <button className="webcam-controller-button" ><i className="material-icons webcam-controller-button-icon">trip_origin</i></button>
+          <button className="webcam-controller-button" ><i className="material-icons webcam-controller-button-icon">flip</i></button>
         </div>
         </div>
       </div>
