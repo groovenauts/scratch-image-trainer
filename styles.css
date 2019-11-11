@@ -141,9 +141,20 @@ video.webcam {
 
 .add-selector-cell {
   display: flex;
+  align-items: center;
+  height: 244px;
+  width: 244px;
+  border-style: solid;
+  border-color: #409C3B;
+  border-width: 1px;
   justify-content: center;
   position: relative;
   margin: 10px;
+}
+
+.add-selector-cell > .material-icons {
+  font-size: 69px;
+  color: #1B5E20;
 }
 
 .selector-cell {
@@ -151,12 +162,31 @@ video.webcam {
   flex-direction: column;
   justify-content: center;
   position: relative;
+  width: 224px;
+  height: 224px;
   margin: 10px;
 }
 
 .selector-label {
   display: flex;
   justify-content: center;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 36px;
+  height: 36px;
+  background: #FEC600;
+  z-index: 2;
+}
+
+.selector-label-text {
+  color: gray;
+  font-size: 24px;
+  padding: 6px;
+}
+
+.selector-cell.selected {
+  border: 10px solid #FEC600 ;
 }
 
 .selector-cell.predicted {
@@ -164,13 +194,11 @@ video.webcam {
 }
 
 .selector-cell:not(.predicted) {
-  margin: 13px;
+  border: 10px solid #FEC600 ;
 }
 
 .selector-canvas {
   position: relative;
-  border: 1px solid #454545;
-  border-radius: 4px;
 }
 
 .flip-image {

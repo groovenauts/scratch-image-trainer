@@ -262,11 +262,12 @@ const Selector = (props) => {
 
     return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "")} >
         <div className="selector-label" >
-          <span className="mdl-chip" ><span className="mdl-chip__text">{ props.index + 1 }</span></span>
+          <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
-        <div className="mdl-badge mdl-badge--overlap" data-badge={badge} >
+        <div className="selector-canvas-container" >
           <canvas className={canvasClassNames.join(" ")} id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
+        <div className="selector-badge">{badge}</div>
         <button className="capture-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" onClick={toggleCapturing} >
           { capturing ?
               <i className="material-icons">stop</i> :
@@ -283,9 +284,7 @@ const AddSelector = (props) => {
         dispatch(new Action("setSelectorNumber", appInfo.selectorNumber + 1));
     };
     return <div className="add-selector-cell" onClick={incrementSelector} >
-        <button className="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
             <i className="material-icons">add</i>
-        </button>
     </div>;
 };
 
@@ -299,11 +298,11 @@ const Selectors = (props) => {
         componentHandler.upgradeAllRegistered();
     }, [appInfo.tensors.length]);
 
-    for (let i = 0; i < appInfo.selectorNumber; i++) {
-        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} imageData={appInfo.sampleImages[i]} />);
-    }
     if ( appInfo.selectorNumber < MAX_LABELS ) {
         selectors.push(<AddSelector key="addSelector" index={appInfo.selectorNumber} appInfo={appInfo} dispatch={dispatch} />);
+    }
+    for (let i = appInfo.selectorNumber-1; i >= 0; i--) {
+        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} imageData={appInfo.sampleImages[i]} />);
     }
     return <div id="selectors">{selectors}</div>
 }
