@@ -76,27 +76,26 @@ header {
 
 .webcam-container {
   position: fixed;
-  top: 50px;
-  width: 100%;
+  top: 60px;
+  width: 224px;
+  height: 100%;
+  right: 0px;
   display: flex;
   justify-content: center;
-  background: orange;
+  background: #F5F5F5 0% 0% no-repeat padding-box;
+  border: 1px solid #BDBDBD;
   z-index: 10;
 }
 
 .webcam-box-outer {
-  background: gray;
-  border: 1px solid #585858;
-  border-radius: 4px;
+  border: 1px solid #BDBDBD;
   box-sizing: border-box;
   display: inline-block;
-  padding: 5px;
-  margin-bottom: 10px;
+  padding: 0px;
+  background: #F5F5F5 0% 0% no-repeat padding-box;
 }
 
 .webcam-box-inner {
-  border: 1px solid #585858;
-  border-radius: 4px;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -111,8 +110,25 @@ video.webcam {
 .webcam-controller {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-around;
   padding: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #6E6E6E;
+}
+
+.webcam-controller-button {
+  display: flex;
+  border: 0px;
+  width: 49px;
+  height: 49px;
+  padding: 2px;
+  background: #F5F5F5 0% 0% no-repeat padding-box;
+}
+
+.webcam-controller-button-icon {
+  font-size: 45px !important;
+  color: #6E6E6E;
 }
 
 #selectors {
@@ -168,9 +184,12 @@ video.webcam {
 }
 
 #trainer {
-  display: flex;
+  position: ;
+  display: block;
   flex-direction: column;
   justify-content: center;
+  right: 100%;
+  width: 300px;
 }
 
 #trainer > div{
