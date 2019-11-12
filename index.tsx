@@ -32,12 +32,14 @@ let translations = {
     "train": "トレーニング",
     "save": "Scratchにアップロード",
     "accessKey": "カギをゲットした",
+    "term_of_service": "利用規約",
   },
   "en": {
     "headerMessage": "Teach scratch with photos!",
     "train": "Train",
     "save": "Upload to Scratch",
     "accessKey": "You got a key",
+    "term_of_service": "Term of Services",
   }
 };
 
@@ -148,6 +150,13 @@ const WebCam = (props) => {
         </div>
         </div>
         <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} />
+        <div id="term-of-service">
+            {formatMessage({id: "term_of_service",
+                             default: "利用規約",
+                             description: "Text message on anchor to Term of Services."
+              })}
+        </div>
+        <div id="copyright">2019 TECH PARK</div>
       </div>
 }
 

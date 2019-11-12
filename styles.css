@@ -16,7 +16,7 @@
  */
 
 html, body {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Noto Sans CJK JP", bold;
   margin: 0;
   padding: 0;
 }
@@ -33,7 +33,6 @@ root {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  font-family: Noto Sans CJK JP;
 }
 
 header {
@@ -286,4 +285,18 @@ video.webcam {
   margin-left: 10px;
   margin-right: 10px;
   padding: 4px;
+}
+
+#term-of-service {
+  position: fixed;
+  bottom: 5px;
+  margin-left: 5px;
+  font-size: 11px;
+}
+
+#copyright {
+  position: fixed;
+  bottom: 5px;
+  right: 5px;
+  font-size: 11px;
 }
