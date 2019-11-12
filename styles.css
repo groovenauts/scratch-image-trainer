@@ -33,6 +33,7 @@ root {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  font-family: Noto Sans CJK JP;
 }
 
 header {
@@ -81,7 +82,8 @@ header {
   height: 100%;
   right: 0px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   background: #F5F5F5 0% 0% no-repeat padding-box;
   border: 1px solid #BDBDBD;
   z-index: 10;
@@ -219,13 +221,30 @@ video.webcam {
   display: block;
   flex-direction: column;
   justify-content: center;
-  right: 100%;
-  width: 300px;
+  width: 224px;
+  margin-top: 30px;
 }
 
 #trainer > div{
   display: flex;
   justify-content: center;
+  width: 200px;
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-top: 5px;
+}
+
+#trainer > div > button {
+  width: 200px;
+  height: 60px;
+  margin: 0px;
+  padding: 0px;
+  border-style: none;
+  border-radius: 0px;
+}
+
+#trainer > div:not(.enabled) {
+  opacity: 0.3;
 }
 
 .training-progress-bar {
@@ -235,7 +254,7 @@ video.webcam {
   margin-bottom: 0px;
   height: 4px;
   width: 100%;
-  top: -4px;
+  top: 21px;
 }
 
 .uploading-spinner {
@@ -243,17 +262,22 @@ video.webcam {
 }
 
 #train-button {
-  margin: 0px;
-  padding: 0px;
-  border-radius: 0px;
+  background: #8BC34A;
+  color: #FFFFFF;
 }
 
 #save-button {
-  margin: 10px;
+  background: #42A5F5;
+  color: #FFFFFF;
 }
 
 .access-key {
-  margin: 10px;
+  margin: 0px;
+}
+
+.access-key-copy-button {
+  background: #409C3B;
+  color: #FFFFFF;
 }
 
 .access-key-textbox {
@@ -262,8 +286,4 @@ video.webcam {
   margin-left: 10px;
   margin-right: 10px;
   padding: 4px;
-}
-
-.access-key-copy-button {
-  margin: 0px;
 }
