@@ -286,7 +286,13 @@ const AddSelector = (props) => {
     const dispatch = props.dispatch;
 
     const incrementSelector = () => {
-        dispatch(new Action("setSelectorNumber", appInfo.selectorNumber + 1));
+        // don't add selector when capturing or training etc..
+        if (appInfo.capturing || appInfo.phase == "training") {
+            return;
+        } else {
+            dispatch(new Action("setSelectorNumber", appInfo.selectorNumber + 1));
+            dispatch(new Action("setSelected", appInfo.selectorNumber));
+        }
     };
     return <div className="add-selector-cell" onClick={incrementSelector} >
             <i className="material-icons">add</i>
