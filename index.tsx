@@ -130,6 +130,10 @@ const WebCam = (props) => {
         dispatch(new Action("setFlipMode", !appInfo.flipMode));
     };
 
+    const toggleCapturing = () => {
+        dispatch(new Action("setCapturing", !appInfo.capturing));
+    };
+
     return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
@@ -139,7 +143,7 @@ const WebCam = (props) => {
           { appInfo.videoFlag ?
               <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam_off</i></button> :
               <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam</i></button>}
-          <button className="webcam-controller-button" ><i className="material-icons webcam-controller-button-icon">trip_origin</i></button>
+          <button className="webcam-controller-button" onClick={toggleCapturing} ><i className="material-icons webcam-controller-button-icon">trip_origin</i></button>
           <button className="webcam-controller-button" onClick={toggleFlipMode} ><i className="material-icons webcam-controller-button-icon">flip</i></button>
         </div>
         </div>
@@ -209,8 +213,10 @@ const Selector = (props) => {
 
     const tensors = appInfo.tensors[props.index];
 
-    const [capturing, setCapturing] = useState(false);
     const canvasRef = useRef();
+
+    // capture and stora image when selected and capturing
+    const capturing = (appInfo.selected == props.index) && appInfo.capturing;
 
     useEffect(() => {
         if (props.imageData) {
@@ -252,10 +258,6 @@ const Selector = (props) => {
         dispatch(new Action("setSelected", ((appInfo.selected == props.index) ? null : props.index)));
     }
 
-    const toggleCapturing = () => {
-        setCapturing(!capturing);
-    }
-
     const badge;
     if (tensors == null) {
         badge = null;
@@ -276,11 +278,6 @@ const Selector = (props) => {
           <canvas className={canvasClassNames.join(" ")} id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
         <div className="selector-badge">{badge}</div>
-        <button className="capture-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" onClick={toggleCapturing} >
-          { capturing ?
-              <i className="material-icons">stop</i> :
-              <i className="material-icons">add_a_photo</i> }
-        </button>
     </div>;
 };
 
@@ -683,6 +680,9 @@ function appReducer(appInfo: any, action: Action) {
         return { ...appInfo, ...{ predicted: appInfo.videoFlag ? action.data : null }};
     case "setFlipMode":
         return { ...appInfo, ...{ flipMode: action.data } };
+    case "setCapturing":
+        // enable capturing only if image selector is selected and video enabled
+        return { ...appInfo, ...{ capturing: action.data && (appInfo.videoFlag && (appInfo.selected != null)) }};
     case "resetAll":
         return {
             ...appInfo,
@@ -707,6 +707,7 @@ const Application = () => {
         phase: "init",
         flipMode: true,
         videoFlag: true,
+        capturing: false,
         selectorNumber: 0,
         selected: null,
         tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
