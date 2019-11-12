@@ -247,7 +247,7 @@ const Selector = (props) => {
             // draw blank to reset canvas content when tensors is set to null from menu
             if (tensors == null) {
                 tf.tidy(() => {
-                    const image = tf.ones([1, 224, 224, 3]);
+                    const image = tf.mul(tf.ones([1, 224, 224, 3]), tf.scalar(0.46));
                     dispatch(new Action("setSampleImage", { index: props.index, image: convertToImageData(image)}));
                 });
             }
