@@ -18,33 +18,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function AccessKey(props) {
-  const label = props.label;
-  const accessKey = props.accessKey;
+    const label = props.label;
+    const accessKey = props.accessKey;
 
-  const [ copying, setCopying ] = useState(false);
-  const textboxRef = useRef(null);
+    const [ copying, setCopying ] = useState(false);
+    const textboxRef = useRef(null);
 
-  function copy() {
-      if (!copying) {
-          textboxRef.current.select();
-          document.execCommand("copy");
-          setCopying(true);
-      }
-  }
+    function copy() {
+        if (!copying) {
+            textboxRef.current.select();
+            document.execCommand("copy");
+            setCopying(true);
+        }
+    }
 
-  useEffect(() => {
-      if (copying) {
-          setTimeout(() => {
-              textboxRef.current.blur();
-              setCopying(false);
-          }, 2000);
-      }
-  }, [copying]);
+    useEffect(() => {
+        if (copying) {
+            setTimeout(() => {
+                textboxRef.current.blur();
+                setCopying(false);
+            }, 2000);
+        }
+    }, [copying]);
 
-  return (<div className="access-key" >
-                    {label}
-                  : <input type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly="1" ref={textboxRef} ></input>
-                  <button className="access-key-copy-button" onClick={copy}><i className="material-icons">{ copying ? "done" : "notes" }</i></button></div>);
+    return (<div className="access-key" >
+            {label}
+            : <input type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly="1" ref={textboxRef} ></input>
+            <button className="access-key-copy-button" onClick={copy}><i className="material-icons">{ copying ? "done" : "notes" }</i></button></div>);
 }
 
 // vim:ft=javascript sw=4
