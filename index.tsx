@@ -30,13 +30,13 @@ let translations = {
   "ja": {
     "headerMessage": "スクラッチに写真をおぼえさせよう!",
     "train": "トレーニング",
-    "save": "アップロード",
+    "save": "Scratchにアップロード",
     "accessKey": "カギをゲットした",
   },
   "en": {
     "headerMessage": "Teach scratch with photos!",
     "train": "Train",
-    "save": "Upload",
+    "save": "Upload to Scratch",
     "accessKey": "You got a key",
   }
 };
@@ -147,6 +147,7 @@ const WebCam = (props) => {
           <button className="webcam-controller-button" onClick={toggleFlipMode} ><i className="material-icons webcam-controller-button-icon">flip</i></button>
         </div>
         </div>
+        <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} />
       </div>
 }
 
@@ -327,6 +328,18 @@ const Trainer = (props) => {
 
     const progressRef = useRef(null);
 
+    let trainable = false;
+
+    if (appInfo.selectorNumber > 1) {
+        let nullSelector = false;
+        for (let i = 0; i < appInfo.selectorNumber; i++) {
+            if (appInfo.tensors[i] == null) {
+                nullSelector = true;
+            }
+        }
+        trainable = !nullSelector;
+    }
+
     async function epochCallback(e, logs) {
         console.log(`Epoch: ${e} Loss: ${logs.loss.toFixed(5)}`);
         if (progressRef.current) {
@@ -365,6 +378,9 @@ const Trainer = (props) => {
     });
 
     function train() {
+        if (phase == "training") {
+            return;
+        }
         dispatch(new Action("setPhase", "training"));
 
         setTimeout(() => {
@@ -435,6 +451,9 @@ const Trainer = (props) => {
     }
 
     function save() {
+        if (phase != "done") {
+            return;
+        }
         dispatch(new Action("setVideoFlag", false));
         dispatch(new Action("setPhase", "uploading"));
         setTimeout(() => {
@@ -451,35 +470,36 @@ const Trainer = (props) => {
 
     const elms = [];
 
-    elms.push(<div key="train-button" ><button id="train-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={train} >
+    const progressbar = [];
+    if (phase == "training") {
+        progressbar.push(
+            <div key="progress-bar" className="training-progress-bar"><div className="mdl-progress mdl-js-progress" ref={progressRef} ></div></div>
+        );
+    }
+
+    elms.push(<div key="train-button" className={trainable ? "enabled" : ""} ><button id="train-button" onClick={train} >
               {formatMessage({
                              id: "train",
                              default: "トレーニング",
                              description: "Text message on train button."
               })}
-                <div key="progress-bar" className="training-progress-bar"><div className="mdl-progress mdl-js-progress" ref={progressRef} ></div></div>
+                { progressbar }
               </button></div>);
-    if (phase == "uploading") {
-        elms.push(<div key="spinner" className="uploading-spinner"><div className="mdl-spinner mdl-js-spinner is-active"></div></div>);
-    }
-    if (phase == "done") {
-        elms.push(<div key="save-button" >
-                    <button id="save-button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onClick={save} >
-                      {formatMessage({
-                          id: "save",
-                          default: "アップロード",
-                          description: "Text message on upload button."
-                      })}
-                    </button>
-                  </div>);
-    }
-    if (phase == "uploaded") {
-        elms.push(<AccessKey key="model-key" label={formatMessage({
-                      id: "accessKey",
-                      default: "カギをゲットした",
-                      description: "Text message for accessKey."
-                  })} accessKey={modelKey} />);
-    }
+
+    elms.push(<div key="save-button" className={ (phase == "done") ? "enabled" : "" }>
+                <button id="save-button" onClick={save} >
+                  {formatMessage({
+                      id: "save",
+                      default: "アップロード",
+                      description: "Text message on upload button."
+                  })}
+                </button>
+              </div>);
+    elms.push(<AccessKey key="model-key" label={formatMessage({
+                  id: "accessKey",
+                  default: "カギをゲットした",
+                  description: "Text message for accessKey."
+              })} accessKey={modelKey} />);
 
     return <div id="trainer">
         {elms}
@@ -632,12 +652,10 @@ const Main = (props) => {
             return <div className="main">
                     <WebCam appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
                     <Selectors appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
-                    <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
                 </div>
         } else {
             return <div className="main">
                     <Selectors appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
-                    <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
                 </div>
         }
     } else {

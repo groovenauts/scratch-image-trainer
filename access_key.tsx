@@ -25,7 +25,7 @@ export default function AccessKey(props) {
     const textboxRef = useRef(null);
 
     function copy() {
-        if (!copying) {
+        if (!copying && textboxRef.current) {
             textboxRef.current.select();
             document.execCommand("copy");
             setCopying(true);
@@ -35,16 +35,25 @@ export default function AccessKey(props) {
     useEffect(() => {
         if (copying) {
             setTimeout(() => {
-                textboxRef.current.blur();
+                if (textboxRef.current) {
+                    textboxRef.current.blur();
+                }
                 setCopying(false);
             }, 2000);
         }
     }, [copying]);
 
-    return (<div className="access-key" >
-            {label}
-            : <input type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly="1" ref={textboxRef} ></input>
-            <button className="access-key-copy-button" onClick={copy}><i className="material-icons">{ copying ? "done" : "notes" }</i></button></div>);
+    const elms = [];
+
+    elms.push(<button key="access-key-copy" className="access-key-copy-button" onClick={copy} >{label}</button>);
+
+    if (accessKey) {
+        elms.push(<input key="access-key-textbox" type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly="1" ref={textboxRef} ></input>);
+    }
+
+    return (<div className={"access-key" + (accessKey ? " enabled" : "") } >
+            {elms}
+            </div>);
 }
 
 // vim:ft=javascript sw=4
