@@ -133,6 +133,7 @@ video.webcam {
 
 #selectors {
   display: flex;
+  margin-right: 224px;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
