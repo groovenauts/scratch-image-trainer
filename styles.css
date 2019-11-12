@@ -105,6 +105,7 @@ header {
 }
 
 video.webcam {
+  background: #757575;
 }
 
 .webcam-controller {
