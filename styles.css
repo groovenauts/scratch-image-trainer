@@ -197,9 +197,9 @@ video.webcam {
   margin: 10px;
 }
 
-.selector-canvas {
-  position: relative;
-  top: 10px;
+.selector-canvas-container {
+  position: absolute;
+  top: 0px;
 }
 
 .flip-image {
