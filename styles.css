@@ -149,7 +149,7 @@ video.webcam {
   border-width: 1px;
   justify-content: center;
   position: relative;
-  margin: 10px;
+  margin: 0px;
 }
 
 .add-selector-cell > .material-icons {
@@ -187,18 +187,19 @@ video.webcam {
 
 .selector-cell.selected {
   border: 10px solid #FEC600 ;
+  margin: 0px;
 }
 
 .selector-cell.predicted {
-  border: 3px dotted red;
 }
 
-.selector-cell:not(.predicted) {
-  border: 10px solid #FEC600 ;
+.selector-cell:not(.selected) {
+  margin: 10px;
 }
 
 .selector-canvas {
   position: relative;
+  top: 10px;
 }
 
 .flip-image {

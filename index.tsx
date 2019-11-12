@@ -244,6 +244,10 @@ const Selector = (props) => {
         }
     }, [capturing, tensors]);
 
+    const toggleSelected = () => {
+        dispatch(new Action("setSelected", ((appInfo.selected == props.index) ? null : props.index)));
+    }
+
     const toggleCapturing = () => {
         setCapturing(!capturing);
     }
@@ -260,7 +264,7 @@ const Selector = (props) => {
         canvasClassNames.push("flip-image");
     }
 
-    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "")} >
+    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (props.isSelected ? " selected" : "") } onClick={toggleSelected} >
         <div className="selector-label" >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
@@ -302,7 +306,7 @@ const Selectors = (props) => {
         selectors.push(<AddSelector key="addSelector" index={appInfo.selectorNumber} appInfo={appInfo} dispatch={dispatch} />);
     }
     for (let i = appInfo.selectorNumber-1; i >= 0; i--) {
-        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} imageData={appInfo.sampleImages[i]} />);
+        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} isSelected={i == appInfo.selected} imageData={appInfo.sampleImages[i]} />);
     }
     return <div id="selectors">{selectors}</div>
 }
@@ -672,6 +676,8 @@ function appReducer(appInfo: any, action: Action) {
         return { ...appInfo, ...{ sampleImages: newSampleImages }};
     case "setSelectorNumber":
         return { ...appInfo, ...{ selectorNumber: action.data }};
+    case "setSelected":
+        return { ...appInfo, ...{ selected: action.data }};
     case "setVideoFlag":
         return { ...appInfo, ...{ videoFlag: action.data, predicted: (action.data) ? appInfo.predicted : null }};
     case "setPredicted":
@@ -703,6 +709,7 @@ const Application = () => {
         flipMode: true,
         videoFlag: true,
         selectorNumber: 0,
+        selected: null,
         tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         mobileNet: null,
