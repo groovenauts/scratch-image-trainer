@@ -215,8 +215,8 @@ const Selector = (props) => {
 
     const canvasRef = useRef();
 
-    // capture and stora image when selected and capturing
-    const capturing = (appInfo.selected == props.index) && appInfo.capturing;
+    // capture and stora image when focused and capturing
+    const capturing = (appInfo.focused == props.index) && appInfo.capturing;
 
     useEffect(() => {
         if (props.imageData) {
@@ -254,8 +254,8 @@ const Selector = (props) => {
         }
     }, [capturing, tensors]);
 
-    const toggleSelected = () => {
-        dispatch(new Action("setSelected", ((appInfo.selected == props.index) ? null : props.index)));
+    const toggleFocused = () => {
+        dispatch(new Action("setFocused", ((appInfo.focused == props.index) ? null : props.index)));
     }
 
     const badge;
@@ -270,7 +270,7 @@ const Selector = (props) => {
         canvasClassNames.push("flip-image");
     }
 
-    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (props.isSelected ? " selected" : "") } onClick={toggleSelected} >
+    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (props.isFocused ? " focused" : "") } onClick={toggleFocused} >
         <div className="selector-label" >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
@@ -291,7 +291,7 @@ const AddSelector = (props) => {
             return;
         } else {
             dispatch(new Action("setSelectorNumber", appInfo.selectorNumber + 1));
-            dispatch(new Action("setSelected", appInfo.selectorNumber));
+            dispatch(new Action("setFocused", appInfo.selectorNumber));
         }
     };
     return <div className="add-selector-cell" onClick={incrementSelector} >
@@ -313,7 +313,7 @@ const Selectors = (props) => {
         selectors.push(<AddSelector key="addSelector" index={appInfo.selectorNumber} appInfo={appInfo} dispatch={dispatch} />);
     }
     for (let i = appInfo.selectorNumber-1; i >= 0; i--) {
-        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} isSelected={i == appInfo.selected} imageData={appInfo.sampleImages[i]} />);
+        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} isFocused={i == appInfo.focused} imageData={appInfo.sampleImages[i]} />);
     }
     return <div id="selectors">{selectors}</div>
 }
@@ -678,8 +678,8 @@ function appReducer(appInfo: any, action: Action) {
         return { ...appInfo, ...{ sampleImages: newSampleImages }};
     case "setSelectorNumber":
         return { ...appInfo, ...{ selectorNumber: action.data }};
-    case "setSelected":
-        return { ...appInfo, ...{ selected: action.data }};
+    case "setFocused":
+        return { ...appInfo, ...{ focused: action.data }};
     case "setVideoFlag":
         return { ...appInfo, ...{ videoFlag: action.data, predicted: (action.data) ? appInfo.predicted : null }};
     case "setPredicted":
@@ -687,8 +687,8 @@ function appReducer(appInfo: any, action: Action) {
     case "setFlipMode":
         return { ...appInfo, ...{ flipMode: action.data } };
     case "setCapturing":
-        // enable capturing only if image selector is selected and video enabled
-        return { ...appInfo, ...{ capturing: action.data && (appInfo.videoFlag && (appInfo.selected != null)) }};
+        // enable capturing only if image selector is focused and video enabled
+        return { ...appInfo, ...{ capturing: action.data && (appInfo.videoFlag && (appInfo.focused != null)) }};
     case "resetAll":
         return {
             ...appInfo,
@@ -715,7 +715,7 @@ const Application = () => {
         videoFlag: true,
         capturing: false,
         selectorNumber: 0,
-        selected: null,
+        focused: null,
         tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         mobileNet: null,
