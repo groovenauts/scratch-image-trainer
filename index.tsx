@@ -24,18 +24,26 @@ import ReactDOM from 'react-dom';
 import modelSaveHandler from "./modelSave";
 import AccessKey from "./access_key";
 
+import images from "./images/*.svg";
+
 const postURL = "https://scratch-image-model-dot-ai-for-edu.appspot.com/models";
 
 let translations = {
   "ja": {
-    "headerMessage": "スクラッチに写真をおぼえさせよう!",
+    "headerTitle": "AIブロック(画像)",
+    "loadFile": "ファイル読み込み",
+    "saveFile": "ファイルダウンロード",
+    "resetAll": "リセット",
     "train": "トレーニング",
     "save": "Scratchにアップロード",
     "accessKey": "カギをゲットした",
     "term_of_service": "利用規約",
   },
   "en": {
-    "headerMessage": "Teach scratch with photos!",
+    "headerTitle": "AI Block (Image)",
+    "loadFile": "load from file",
+    "saveFile": "download to file",
+    "resetAll": "reset",
     "train": "Train",
     "save": "Upload to Scratch",
     "accessKey": "You got a key",
@@ -51,13 +59,144 @@ formatMessage.setup({
 
 const MAX_LABELS = 10;
 
-const Header = () => {
+const Header = (props) => {
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
+    const resetAll = () => {
+        dispatch(new Action("resetAll"));
+    };
+
+    const loadFromFile = () => {
+        if (!(window.FileList && window.FileReader && window.Blob)) {
+            alert("The File APIs are not supported in your browser.");
+            return;
+        }
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.addEventListener("change", (e) => {
+            const files = e.target.files;
+            if (files.length < 1) {
+                return;
+            }
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const buffer = e.target.result;
+                const labels_num = (new Uint32Array(buffer, 0, 1))[0];
+                if (labels_num > MAX_LABELS) {
+                    alert("This file contains too many labels.");
+                    return;
+                }
+                const sectionLengths = new Uint32Array(buffer, 1*4, labels_num);
+                const tensors = [];
+                const imageData = [];
+                let cursor = (labels_num + 1)*4;
+                for (let i = 0; i < labels_num; i++) {
+                    if (sectionLengths[i] > 0) {
+                        if (sectionLengths[i] % 4 != 0) {
+                            alert("This file header contains invalid record size");
+                            return;
+                        }
+                        const fnum = sectionLengths[i] / 4;
+                        if (fnum % (7 * 7 * 256) != 0) {
+                            alert("This file header contains invalid record size");
+                            return;
+                        }
+                        const buf = new Float32Array(buffer, cursor, fnum);
+                        cursor += sectionLengths[i];
+                        const sampleNum = fnum / (7 * 7 * 256);
+                        tensors.push(tf.tensor4d(buf, [sampleNum, 7, 7, 256]));
+                    } else {
+                        tensors.push(null);
+                    }
+                }
+                const sampleImagesLengths = new Uint32Array(buffer, cursor, labels_num);
+                cursor += labels_num * 4;
+                for (let i = 0; i < labels_num; i++) {
+                    if (sampleImagesLengths[i] > 0) {
+                        const buff = new Uint8ClampedArray(buffer, cursor, sampleImagesLengths[i]);
+                        const imgData = new ImageData(IMAGE_SIZE, IMAGE_SIZE);
+                        for (let j = 0; j < buff.length; j++) {
+                            imgData.data[j] = buff[j];
+                        }
+                        cursor += sampleImagesLengths[i];
+                        imageData.push(imgData);
+                    } else {
+                        imageData.push(null);
+                    }
+                }
+                dispatch(new Action("loadData", {
+                    selectorNumber: labels_num,
+                    tensors: tensors,
+                    sampleImages: imageData
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+        fileInput.click();
+    };
+
+    const saveToFile = () => {
+        const blobs = [];
+        const header = new Uint32Array(appInfo.selectorNumber+1);
+        header[0] = appInfo.selectorNumber;
+        let totalBytes = 0;
+        const tensorBlobs = [];
+        for (let i = 0; i < appInfo.selectorNumber; i++) {
+            if (appInfo.tensors[i]){
+                const t = appInfo.tensors[i].dataSync();
+                const b = new Blob([t.buffer.slice(t.byteOffset, t.byteOffset + t.byteLength]);
+                header[i+1] = b.size;
+                totalBytes += b.size;
+                tensorBlobs.push(b);
+            } else {
+                header[i+1] = 0;
+            }
+        }
+        if (totalBytes == 0) {
+            return;
+        }
+        blobs.push(new Blob([header]));
+        tensorBlobs.forEach((b) => blobs.push(b));
+        const sampleImagesHeader = new Uint32Array(appInfo.selectorNumber);
+        const sampleImages = [];
+        for (let i = 0; i < appInfo.selectorNumber; i++) {
+            const simage = appInfo.sampleImages[i];
+            if (simage) {
+                const b = new Blob([simage.data]);
+                sampleImagesHeader[i] = b.size;
+                sampleImages.push(b);
+            } else {
+                sampleImagesHeader[i] = 0;
+            }
+        }
+        blobs.push(new Blob([sampleImagesHeader]));
+        sampleImages.forEach((b) => blobs.push(b));
+        const totalBlob = new Blob(blobs, {type: "application/octet-stream"});
+        const blobURL = URL.createObjectURL(totalBlob);
+        const anchor = document.createElement("a");
+        anchor.href = blobURL;
+        anchor.target = "_blank";
+        anchor.download = "ImageData.dat"
+        anchor.click();
+    };
+
     return <header>
-        <div>{formatMessage({
-                            id: "headerMessage",
-                            default: "スクラッチに写真をおぼえさせよう!",
+        <img className="header-logo" src={images["techpark_logo"]} />
+        <div className="header-title" >{formatMessage({
+                            id: "headerTitle",
                             description: "Text message in header."
         })}</div>
+        <div className="header-menu" onClick={loadFromFile} >{formatMessage({
+                            id: "loadFile",
+                            description: "Text label for load file."})}</div>
+        <div className="header-menu" onClick={saveToFile} >{formatMessage({
+                            id: "saveFile",
+                            description: "Text label for save file."})}</div>
+        <div id="reset" className="header-menu" onClick={resetAll} >{formatMessage({
+                            id: "resetAll",
+                            description: "Text label for reset."})}</div>
         </header>;
 }
 
@@ -515,141 +654,6 @@ const Trainer = (props) => {
         </div>
 };
 
-const Menu = (props) => {
-    const appInfo = props.appInfo;
-    const dispatch = props.dispatch;
-
-    const resetAll = () => {
-        dispatch(new Action("resetAll"));
-    };
-
-    const loadFromFile = () => {
-        if (!(window.FileList && window.FileReader && window.Blob)) {
-            alert("The File APIs are not supported in your browser.");
-            return;
-        }
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.addEventListener("change", (e) => {
-            const files = e.target.files;
-            if (files.length < 1) {
-                return;
-            }
-            const file = files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const buffer = e.target.result;
-                const labels_num = (new Uint32Array(buffer, 0, 1))[0];
-                if (labels_num > MAX_LABELS) {
-                    alert("This file contains too many labels.");
-                    return;
-                }
-                const sectionLengths = new Uint32Array(buffer, 1*4, labels_num);
-                const tensors = [];
-                const imageData = [];
-                let cursor = (labels_num + 1)*4;
-                for (let i = 0; i < labels_num; i++) {
-                    if (sectionLengths[i] > 0) {
-                        if (sectionLengths[i] % 4 != 0) {
-                            alert("This file header contains invalid record size");
-                            return;
-                        }
-                        const fnum = sectionLengths[i] / 4;
-                        if (fnum % (7 * 7 * 256) != 0) {
-                            alert("This file header contains invalid record size");
-                            return;
-                        }
-                        const buf = new Float32Array(buffer, cursor, fnum);
-                        cursor += sectionLengths[i];
-                        const sampleNum = fnum / (7 * 7 * 256);
-                        tensors.push(tf.tensor4d(buf, [sampleNum, 7, 7, 256]));
-                    } else {
-                        tensors.push(null);
-                    }
-                }
-                const sampleImagesLengths = new Uint32Array(buffer, cursor, labels_num);
-                cursor += labels_num * 4;
-                for (let i = 0; i < labels_num; i++) {
-                    if (sampleImagesLengths[i] > 0) {
-                        const buff = new Uint8ClampedArray(buffer, cursor, sampleImagesLengths[i]);
-                        const imgData = new ImageData(IMAGE_SIZE, IMAGE_SIZE);
-                        for (let j = 0; j < buff.length; j++) {
-                            imgData.data[j] = buff[j];
-                        }
-                        cursor += sampleImagesLengths[i];
-                        imageData.push(imgData);
-                    } else {
-                        imageData.push(null);
-                    }
-                }
-                dispatch(new Action("loadData", {
-                    selectorNumber: labels_num,
-                    tensors: tensors,
-                    sampleImages: imageData
-                });
-            };
-            reader.readAsArrayBuffer(file);
-        });
-        fileInput.click();
-    };
-
-    const saveToFile = () => {
-        const blobs = [];
-        const header = new Uint32Array(appInfo.selectorNumber+1);
-        header[0] = appInfo.selectorNumber;
-        let totalBytes = 0;
-        const tensorBlobs = [];
-        for (let i = 0; i < appInfo.selectorNumber; i++) {
-            if (appInfo.tensors[i]){
-                const t = appInfo.tensors[i].dataSync();
-                const b = new Blob([t.buffer.slice(t.byteOffset, t.byteOffset + t.byteLength]);
-                header[i+1] = b.size;
-                totalBytes += b.size;
-                tensorBlobs.push(b);
-            } else {
-                header[i+1] = 0;
-            }
-        }
-        if (totalBytes == 0) {
-            return;
-        }
-        blobs.push(new Blob([header]));
-        tensorBlobs.forEach((b) => blobs.push(b));
-        const sampleImagesHeader = new Uint32Array(appInfo.selectorNumber);
-        const sampleImages = [];
-        for (let i = 0; i < appInfo.selectorNumber; i++) {
-            const simage = appInfo.sampleImages[i];
-            if (simage) {
-                const b = new Blob([simage.data]);
-                sampleImagesHeader[i] = b.size;
-                sampleImages.push(b);
-            } else {
-                sampleImagesHeader[i] = 0;
-            }
-        }
-        blobs.push(new Blob([sampleImagesHeader]));
-        sampleImages.forEach((b) => blobs.push(b));
-        const totalBlob = new Blob(blobs, {type: "application/octet-stream"});
-        const blobURL = URL.createObjectURL(totalBlob);
-        const anchor = document.createElement("a");
-        anchor.href = blobURL;
-        anchor.target = "_blank";
-        anchor.download = "ImageData.dat"
-        anchor.click();
-    };
-
-    return <div className="menu">
-        <button id="menu-button" className="mdl-button mdl-js-button mdl-button--icon">
-            <i className="material-icons">menu</i>
-        </button>
-        <ul className="mdl-menu mdl-menu--bottom-left mdl-js-menu" htmlFor="menu-button" >
-            <li className="mdl-menu__item menu-item" onClick={resetAll} >Reset</li>
-            <li className="mdl-menu__item menu-item" onClick={loadFromFile} >Load from file</li>
-            <li className="mdl-menu__item menu-item" onClick={saveToFile} >Save to file</li>
-        </ul>
-        </div>
-};
-
 const Main = (props) => {
     const appInfo = props.appInfo;
     const dispatch = props.dispatch;
@@ -794,8 +798,7 @@ const Application = () => {
     }, []);
 
     return <div className="root">
-            <Header />
-            <Menu appInfo={appInfo} dispatch={dispatch} />
+            <Header appInfo={appInfo} dispatch={dispatch} />
             <Main appInfo={appInfo} dispatch={dispatch} />
         </div>;
 };
