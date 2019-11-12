@@ -126,6 +126,10 @@ const WebCam = (props) => {
         dispatch(new Action("setVideoFlag", !appInfo.videoFlag));
     };
 
+    const toggleFlipMode = () => {
+        dispatch(new Action("setFlipMode", !appInfo.flipMode));
+    };
+
     return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
@@ -136,7 +140,7 @@ const WebCam = (props) => {
               <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam_off</i></button> :
               <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam</i></button>}
           <button className="webcam-controller-button" ><i className="material-icons webcam-controller-button-icon">trip_origin</i></button>
-          <button className="webcam-controller-button" ><i className="material-icons webcam-controller-button-icon">flip</i></button>
+          <button className="webcam-controller-button" onClick={toggleFlipMode} ><i className="material-icons webcam-controller-button-icon">flip</i></button>
         </div>
         </div>
       </div>
@@ -602,16 +606,11 @@ const Menu = (props) => {
         anchor.click();
     };
 
-    const toggleFlipMode = () => {
-        dispatch(new Action("setFlipMode", !appInfo.flipMode));
-    };
-
     return <div className="menu">
         <button id="menu-button" className="mdl-button mdl-js-button mdl-button--icon">
             <i className="material-icons">menu</i>
         </button>
         <ul className="mdl-menu mdl-menu--bottom-left mdl-js-menu" htmlFor="menu-button" >
-            <li className="mdl-menu__item menu-item mdl-menu__item--full-bleed-divider" onClick={toggleFlipMode}>Flip Image</li>
             <li className="mdl-menu__item menu-item" onClick={resetAll} >Reset</li>
             <li className="mdl-menu__item menu-item" onClick={loadFromFile} >Load from file</li>
             <li className="mdl-menu__item menu-item" onClick={saveToFile} >Save to file</li>
