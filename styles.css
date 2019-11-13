@@ -273,6 +273,25 @@ video.webcam {
   z-index: 4;
 }
 
+.selector-delete-button {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: -15px;
+  right: -25px;
+  width: 40px;
+  height: 40px;
+  background: #409C3B 0% 0% no-repeat padding-box;
+  border: 5px solid #FFFFFF;
+  border-radius: 50%;
+  color: #FFFFFF;
+  z-index: 4;
+}
+
+.selector-delete-button > i {
+  font-size: 26px;
+}
+
 .capture-button {
   position: absolute;
   left: 4px;
