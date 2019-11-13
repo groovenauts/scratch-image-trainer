@@ -183,7 +183,7 @@ const Header = (props) => {
     };
 
     return <header>
-        <img className="header-logo" src={images["techpark_logo"]} />
+        <img className="header-logo" src={images["techpark_logo"]} onClick={() => {console.log(tf.memory());} }/>
         <div className="header-title" >{formatMessage({
                             id: "headerTitle",
                             description: "Text message in header."
