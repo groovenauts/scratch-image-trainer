@@ -429,7 +429,11 @@ const Selector = (props) => {
         <div className="selector-canvas-container" >
           <canvas className={canvasClassNames.join(" ")} id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
-        <div className="selector-badge">{badge}</div>
+        { badge ? [
+            <canvas className="selector-badge-background"> </canvas>,
+            <canvas className="selector-badge"></canvas>,
+            <div className="selector-badge-label" >{badge}</div>
+        ] : []}
     </div>;
 };
 

@@ -223,6 +223,46 @@ video.webcam {
   transform: scaleX(-1);
 }
 
+.selector-badge-background {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  width: 56px;
+  height: 56px;
+  background: #A0A0A0;
+  border-width: 4px;
+  border-style: solid;
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+  z-index: 2;
+}
+
+.selector-badge {
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  width: 56px;
+  height: 56px;
+  background: #A0A0A0;
+  border-width: 4px;
+  border-style: solid;
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+  z-index: 3;
+}
+
+.selector-badge-label {
+  position: absolute;
+  bottom: 20px;
+  left: 4px;
+  width: 56px;
+  text-align: center;
+  margin: 0px;
+  font-size: 17px;
+  color: #FFFFFF;
+  z-index: 4;
+}
+
 .capture-button {
   position: absolute;
   left: 4px;
