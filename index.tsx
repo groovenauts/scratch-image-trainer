@@ -279,7 +279,7 @@ const WebCam = (props) => {
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
             { appInfo.videoFlag ? [
-              <video autoPlay playsInline muted className={webcamClassNames.join(" ")} width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} ></video>
+              <video autoPlay playsInline muted className={webcamClassNames.join(" ")} key="webcam" width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} ></video>
             ] : [] }
           </div>
         <div className="webcam-controller">
@@ -366,8 +366,10 @@ const Selector = (props) => {
 
     const canvasRef = useRef();
 
+    const focused = appInfo.focused == props.index;
+
     // capture and stora image when focused and capturing
-    const capturing = (appInfo.focused == props.index) && appInfo.capturing;
+    const capturing = focused && appInfo.capturing;
 
     useEffect(() => {
         if (props.imageData) {
@@ -408,8 +410,15 @@ const Selector = (props) => {
     const toggleFocused = () => {
         // Do not change focus during capturing.
         if (!capturing) {
-            dispatch(new Action("setFocused", ((appInfo.focused == props.index) ? null : props.index)));
+            dispatch(new Action("setFocused", (focused ? null : props.index)));
         }
+    }
+
+    const deleteSamples = (ev) => {
+        tensors.dispose();
+        dispatch(new Action("setTensor", { index: props.index, tensor: null }));
+        dispatch(new Action("setSampleImage", { index: props.index, image: null }));
+        ev.stopPropagation();
     }
 
     const badge;
@@ -424,7 +433,7 @@ const Selector = (props) => {
         canvasClassNames.push("flip-image");
     }
 
-    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (props.isFocused ? " focused" : "") } onClick={toggleFocused} >
+    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (focused ? " focused" : "") } onClick={toggleFocused} >
         <div className="selector-label" >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
@@ -432,9 +441,14 @@ const Selector = (props) => {
           <canvas className={canvasClassNames.join(" ")} id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
         { badge ? [
-            <canvas className="selector-badge-background"> </canvas>,
-            <canvas className="selector-badge"></canvas>,
-            <div className="selector-badge-label" >{badge}</div>
+            <canvas key="selector-badge-background" className="selector-badge-background"> </canvas>,
+            <canvas key="selector-badge" className="selector-badge"></canvas>,
+            <div key="selector-badge-label" className="selector-badge-label" >{badge}</div>
+        ] : []}
+        { (focused && badge && !capturing) ? [
+            <button key="selector-badge-button" className="selector-delete-button" onClick={deleteSamples} >
+                <i className="material-icons">delete</i>
+            </div>
         ] : []}
     </div>;
 };
@@ -471,7 +485,7 @@ const Selectors = (props) => {
         selectors.push(<AddSelector key="addSelector" index={appInfo.selectorNumber} appInfo={appInfo} dispatch={dispatch} />);
     }
     for (let i = appInfo.selectorNumber-1; i >= 0; i--) {
-        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} isFocused={i == appInfo.focused} imageData={appInfo.sampleImages[i]} />);
+        selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} imageData={appInfo.sampleImages[i]} />);
     }
     return <div id="selectors">{selectors}</div>
 }
