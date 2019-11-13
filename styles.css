@@ -285,7 +285,24 @@ video.webcam {
 }
 
 .access-key {
+  display: flex;
   margin: 0px;
+  flex-direction: column;
+}
+
+.access-key-label {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: 5px;
+}
+
+.access-key-icon {
+  margin-right: 5px;
+}
+
+.access-key-text {
+  font-size: 18px;
 }
 
 .access-key-copy-button {
@@ -294,11 +311,13 @@ video.webcam {
 }
 
 .access-key-textbox {
-  margin-top: 0px;
-  margin-bottom: 0px;
-  margin-left: 10px;
-  margin-right: 10px;
-  padding: 4px;
+  position: relative;
+  margin: 0px;
+  padding: 0px;
+  width: 0px;
+  height: 0px;
+  top: -30px;
+  z-index: -10;
 }
 
 #term-of-service {
