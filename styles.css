@@ -140,6 +140,7 @@ video.webcam {
   border-bottom-style: solid;
   border-bottom-width: 1px;
   border-bottom-color: #6E6E6E;
+  border-top: 1px solid #6E6E6E;
 }
 
 .webcam-controller-button {
