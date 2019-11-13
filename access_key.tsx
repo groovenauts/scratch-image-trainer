@@ -17,6 +17,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
+import images from "./images/*.svg";
+
 export default function AccessKey(props) {
     const label = props.label;
     const accessKey = props.accessKey;
@@ -49,6 +51,10 @@ export default function AccessKey(props) {
 
     if (accessKey) {
         elms.push(<input key="access-key-textbox" type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly="1" ref={textboxRef} ></input>);
+        elms.push(<div key="access-key-label" className="access-key-label" >
+                    <img className="access-key-icon" src={images["key-24px"]} />
+                    <span className="access-key-text" >{accessKey}</span>
+                  </div>);
     }
 
     return (<div className={"access-key" + (accessKey ? " enabled" : "") } >
