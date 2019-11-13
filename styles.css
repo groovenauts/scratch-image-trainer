@@ -57,21 +57,30 @@ header {
 
 .header-title {
   margin-left: 10px;
-  padding-top: 25px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-top: 15px;
+  padding-right: 15px;
   font-size: 20px;
-  vertical-align: middle;
+  border-right: 2px inset #A0E5A0;
 }
 
 .header-menu {
-  padding-top: 25px;
+  padding-top: 20px;
   margin-left: 20px;
   font-size: 16px;
-  vertical-align: middle;
 }
 
 #reset {
+  margin-top: 5px;
+  padding-top: 15px;
+  padding-left: 20px;
+  font-size: 16px;
   position: fixed;
+  top: 0px;
   right: 10px;
+  height: 35px;
+  border-left: 2px solid #A0E5A0;
 }
 
 .main {
