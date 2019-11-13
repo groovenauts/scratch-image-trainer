@@ -278,7 +278,9 @@ const WebCam = (props) => {
     return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
-            <video autoPlay playsInline muted className={webcamClassNames.join(" ")} width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} ></video>
+            { appInfo.videoFlag ? [
+              <video autoPlay playsInline muted className={webcamClassNames.join(" ")} width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} ></video>
+            ] : [] }
           </div>
         <div className="webcam-controller">
           { appInfo.videoFlag ?
