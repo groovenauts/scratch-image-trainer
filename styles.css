@@ -254,6 +254,7 @@ video.webcam {
   padding: 0px;
   border-style: none;
   border-radius: 0px;
+  font-size: 18px;
 }
 
 #trainer > div:not(.enabled) {
