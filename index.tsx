@@ -36,7 +36,7 @@ let translations = {
     "resetAll": "リセット",
     "train": "トレーニング",
     "save": "Scratchにアップロード",
-    "accessKey": "カギをゲットした",
+    "copyAccessKey": "カギをコピーする",
     "term_of_service": "利用規約",
   },
   "en": {
@@ -46,7 +46,7 @@ let translations = {
     "resetAll": "reset",
     "train": "Train",
     "save": "Upload to Scratch",
-    "accessKey": "You got a key",
+    "copyAccessKey": "Copy a key",
     "term_of_service": "Term of Services",
   }
 };
@@ -647,9 +647,9 @@ const Trainer = (props) => {
                 </button>
               </div>);
     elms.push(<AccessKey key="model-key" label={formatMessage({
-                  id: "accessKey",
-                  default: "カギをゲットした",
-                  description: "Text message for accessKey."
+                  id: "copyAccessKey",
+                  default: "カギをコピーする",
+                  description: "Text message for copy accessKey."
               })} accessKey={modelKey} />);
 
     return <div id="trainer">
