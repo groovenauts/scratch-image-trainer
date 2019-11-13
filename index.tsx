@@ -404,7 +404,10 @@ const Selector = (props) => {
     }, [capturing, tensors]);
 
     const toggleFocused = () => {
-        dispatch(new Action("setFocused", ((appInfo.focused == props.index) ? null : props.index)));
+        // Do not change focus during capturing.
+        if (!capturing) {
+            dispatch(new Action("setFocused", ((appInfo.focused == props.index) ? null : props.index)));
+        }
     }
 
     const badge;
