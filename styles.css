@@ -340,10 +340,6 @@ video.webcam {
   top: 21px;
 }
 
-.uploading-spinner {
-  margin: 10px;
-}
-
 #train-button {
   background: #8BC34A;
   color: #FFFFFF;
