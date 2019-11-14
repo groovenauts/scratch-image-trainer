@@ -439,7 +439,7 @@ const Selector = (props) => {
         canvasClassNames.push("flip-image");
     }
 
-    const translucent = ((appInfo.phase == "done" || appInfo.phase == "uploaded") && !props.isPredicted);
+    const translucent = ((appInfo.phase == "done" || appInfo.phase == "uploaded") && !props.isPredicted && appInfo.videoFlag);
 
     return <div className={"selector-cell" + (translucent ? " translucent" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
         <div className={"selector-label" + (capturing ? " capturing" : "")} >
