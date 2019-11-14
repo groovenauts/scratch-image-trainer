@@ -132,6 +132,45 @@ video.webcam {
   background: #757575;
 }
 
+.webcam-box-border {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 204px;
+  height: 204px;
+  z-index: 12;
+  border: 10px solid #FEC600;
+}
+
+.webcam-box-border.capturing {
+  border: 10px solid #E64A19;
+}
+
+.webcam-box-label {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 36px;
+  height: 36px;
+  z-index: 12;
+}
+
+.webcam-box-label.capturing {
+  background: #E64A19;
+}
+
+.webcam-box-label:not(.capturing) {
+  background: #FEC600;
+}
+
+.webcam-box-label-text {
+  color: gray;
+  font-size: 24px;
+  padding: 6px;
+}
+
 .webcam-controller {
   display: flex;
   flex-direction: row;
@@ -202,8 +241,15 @@ video.webcam {
   left: 0px;
   width: 36px;
   height: 36px;
-  background: #FEC600;
   z-index: 2;
+}
+
+.selector-label.capturing {
+  background: #E64A19;
+}
+
+.selector-label:not(.capturing) {
+  background: #FEC600;
 }
 
 .selector-label-text {
@@ -214,6 +260,11 @@ video.webcam {
 
 .selector-cell.focused {
   border: 10px solid #FEC600 ;
+  margin: 0px;
+}
+
+.selector-cell.focused.capturing {
+  border: 10px solid #E64A19 ;
   margin: 0px;
 }
 

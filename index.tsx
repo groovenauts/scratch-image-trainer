@@ -282,6 +282,12 @@ const WebCam = (props) => {
               <video autoPlay playsInline muted className={webcamClassNames.join(" ")} key="webcam" width={videoSize[0]} height={videoSize[1]} onLoadedData={handleVideoSize} ref={props.webcamRef} ></video>
             ] : [] }
           </div>
+          { (appInfo.focused != null) ? [
+            <div className={"webcam-box-border" + (appInfo.capturing ? " capturing" : "")}></div>,
+            <div className={"webcam-box-label" + (appInfo.capturing ? " capturing" : "")} >
+              <span className="webcam-box-label-text">{ appInfo.focused+1 }</span>
+            </div>
+          ] : [] }
         <div className="webcam-controller">
           { appInfo.videoFlag ?
               <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam_off</i></button> :
@@ -433,8 +439,8 @@ const Selector = (props) => {
         canvasClassNames.push("flip-image");
     }
 
-    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (focused ? " focused" : "") } onClick={toggleFocused} >
-        <div className="selector-label" >
+    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
+        <div className={"selector-label" + (capturing ? " capturing" : "")} >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
         <div className="selector-canvas-container" >
