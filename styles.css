@@ -84,9 +84,10 @@ header {
 }
 
 .main {
-  position: relative;
-  top: 340px;
-  left: 0;
+  position: absolute;
+  top: 60px;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   margin: 9px auto 0;
