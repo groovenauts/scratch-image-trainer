@@ -233,6 +233,10 @@ video.webcam {
   margin: 10px;
 }
 
+.selector-cell.translucent {
+  opacity: 0.5;
+}
+
 .selector-label {
   display: flex;
   justify-content: center;
