@@ -439,7 +439,9 @@ const Selector = (props) => {
         canvasClassNames.push("flip-image");
     }
 
-    return <div className={"selector-cell" + (props.isPredicted ? " predicted" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
+    const translucent = ((appInfo.phase == "done" || appInfo.phase == "uploaded") && !props.isPredicted);
+
+    return <div className={"selector-cell" + (translucent ? " translucent" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
         <div className={"selector-label" + (capturing ? " capturing" : "")} >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
