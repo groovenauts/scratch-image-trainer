@@ -560,6 +560,7 @@ const Trainer = (props) => {
         if (phase == "training") {
             return;
         }
+        dispatch(new Action("setFocused", null));
         dispatch(new Action("setPhase", "training"));
 
         setTimeout(() => {
@@ -625,6 +626,7 @@ const Trainer = (props) => {
                 optimizer.dispose();
                 dispatch(new Action("setHeadNet", net));
                 dispatch(new Action("setPhase", "done"));
+                dispatch(new Action("setFocused", null));
             });
         }, 200);
     }
