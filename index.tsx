@@ -371,6 +371,8 @@ const Selector = (props) => {
     const tensors = appInfo.tensors[props.index];
 
     const canvasRef = useRef();
+    const badgeCanvasRef = useRef();
+    const badgeBgCanvasRef = useRef();
 
     const focused = appInfo.focused == props.index;
 
@@ -413,6 +415,14 @@ const Selector = (props) => {
         }
     }, [capturing, tensors]);
 
+    useEffect(() => {
+        // Render only first captured image.
+        if (badgeCanvasRef.current && props.imageData) {
+            drawCanvas(props.imageData, badgeCanvasRef.current);
+            drawCanvas(props.imageData, badgeBgCanvasRef.current);
+        }
+    }, [badgeCanvasRef.current]);
+
     const toggleFocused = () => {
         // Do not change focus during capturing.
         if (!capturing) {
@@ -434,9 +444,13 @@ const Selector = (props) => {
         badge = tensors.shape[0];
     }
 
-    const canvasClassNames = [ "selector-canvas" ];
+    const canvasModifierClassNames = [];
     if (appInfo.flipMode) {
-        canvasClassNames.push("flip-image");
+        canvasModifierClassNames.push("flip-image");
+    }
+
+    const canvasClassName = (basename) => {
+        return [basename].concat(canvasModifierClassNames).join(" ");
     }
 
     const translucent = ((appInfo.phase == "done" || appInfo.phase == "uploaded") && !props.isPredicted && appInfo.videoFlag);
@@ -446,11 +460,11 @@ const Selector = (props) => {
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
         <div className="selector-canvas-container" >
-          <canvas className={canvasClassNames.join(" ")} id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
+          <canvas className={canvasClassName("selector-canvas")} id={"canvas-" + props.index} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={canvasRef} />
         </div>
         { badge ? [
-            <canvas key="selector-badge-background" className="selector-badge-background"> </canvas>,
-            <canvas key="selector-badge" className="selector-badge"></canvas>,
+            <canvas key="selector-badge-background" className={canvasClassName("selector-badge-background")} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={badgeCanvasRef} > </canvas>,
+            <canvas key="selector-badge" className={canvasClassName("selector-badge")} width={IMAGE_SIZE} height={IMAGE_SIZE} ref={badgeBgCanvasRef} ></canvas>,
             <div key="selector-badge-label" className="selector-badge-label" >{badge}</div>
         ] : []}
         { (focused && badge && !capturing) ? [
