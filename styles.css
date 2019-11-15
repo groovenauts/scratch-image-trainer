@@ -137,8 +137,8 @@ video.webcam {
   position: absolute;
   top: 0px;
   left: 0px;
-  width: 204px;
-  height: 204px;
+  width: 205px;
+  height: 205px;
   z-index: 12;
   border: 10px solid #FEC600;
 }
