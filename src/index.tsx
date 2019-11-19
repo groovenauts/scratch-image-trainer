@@ -21,12 +21,11 @@ import formatMessage from "format-message";
 import React, { useState, useEffect, useRef, useReducer } from 'react';
 import ReactDOM from 'react-dom';
 
-import modelSaveHandler from "./modelSave";
+import Action from "./Action";
 import AccessKey from "./access_key";
+import SaveModel from "./SaveModel";
 
 import images from "./images/*.svg";
-
-const postURL = "https://scratch-image-model-dot-ai-for-edu.appspot.com/models";
 
 let translations = {
   "ja": {
@@ -201,14 +200,6 @@ const Header = (props) => {
 }
 
 const IMAGE_SIZE = 224;
-
-class Action {
-    constructor(public type: string,
-                public data: any){
-        this.type = type;
-        this.data = data;
-    }
-}
 
 const WebCam = (props) => {
     const appInfo = props.appInfo;
@@ -510,14 +501,12 @@ const Selectors = (props) => {
         selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} imageData={appInfo.sampleImages[i]} />);
     }
     return <div id="selectors">{selectors}</div>
-}
+};
 
 const Trainer = (props) => {
     const appInfo = props.appInfo;
     const dispatch = props.dispatch;
     const phase = appInfo.phase;
-
-    const [ modelKey, setModelKey ] = useState(null);
 
     const progressRef = useRef(null);
 
@@ -640,25 +629,8 @@ const Trainer = (props) => {
                 optimizer.dispose();
                 dispatch(new Action("setHeadNet", net));
                 dispatch(new Action("setPhase", "done"));
+                dispatch(new Action("setModelKey", null));
                 dispatch(new Action("setFocused", null));
-            });
-        }, 200);
-    }
-
-    function save() {
-        if (phase != "done") {
-            return;
-        }
-        dispatch(new Action("setVideoFlag", false));
-        dispatch(new Action("setPhase", "uploading"));
-        setTimeout(() => {
-            appInfo.headNet.save(tf.io.withSaveHandler(modelSaveHandler(postURL))).then((key) => {
-                setModelKey(key)
-                dispatch(new Action("setVideoFlag", false));
-                dispatch(new Action("setPhase", "done"));
-            }).catch(error => {
-                console.log("Failed to save model: " + error);
-                dispatch(new Action("setPhase", "done"));
             });
         }, 200);
     }
@@ -682,7 +654,7 @@ const Trainer = (props) => {
               </button></div>);
 
     elms.push(<div key="save-button" className={ (phase == "done") ? "enabled" : "" }>
-                <button id="save-button" onClick={save} >
+                <button id="save-button" onClick={SaveModel(appInfo, dispatch, phase)} >
                   {formatMessage({
                       id: "save",
                       default: "アップロード",
@@ -694,7 +666,7 @@ const Trainer = (props) => {
                   id: "copyAccessKey",
                   default: "カギをコピーする",
                   description: "Text message for copy accessKey."
-              })} accessKey={modelKey} />);
+              })} accessKey={appInfo.modelKey} />);
 
     return <div id="trainer">
         {elms}
@@ -767,6 +739,8 @@ function appReducer(appInfo: any, action: Action) {
     case "setCapturing":
         // enable capturing only if image selector is focused and video enabled
         return { ...appInfo, ...{ capturing: action.data && (appInfo.videoFlag && (appInfo.focused != null)) }};
+    case "setModelKey":
+        return { ...appInfo, ...{ modelKey: action.data }};
     case "resetAll":
         return {
             ...appInfo,
@@ -796,6 +770,7 @@ const Application = () => {
         focused: null,
         tensors: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
         sampleImages: Array.apply(null, Array(MAX_LABELS)).map(function(){return null;}),
+        modelKey: null,
         mobileNet: null,
         headNet: null
     };
