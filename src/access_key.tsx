@@ -17,7 +17,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-import images from "./images/*.svg";
+import key_img from "./images/key-24px.svg";
 
 export default function AccessKey(props) {
     const label = props.label;
@@ -47,17 +47,17 @@ export default function AccessKey(props) {
 
     const elms = [];
 
-    elms.push(<button key="access-key-copy" className="access-key-copy-button" onClick={copy} >{label}</button>);
+    elms.push(<button data-testid="access-key-copy" key="access-key-copy" className="access-key-copy-button" onClick={copy} >{label}</button>);
 
     if (accessKey) {
-        elms.push(<input key="access-key-textbox" type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly="1" ref={textboxRef} ></input>);
+        elms.push(<input key="access-key-textbox" type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly={true} ref={textboxRef} ></input>);
         elms.push(<div key="access-key-label" className="access-key-label" >
-                    <img className="access-key-icon" src={images["key-24px"]} />
-                    <span className="access-key-text" >{accessKey}</span>
+                    <img className="access-key-icon" src={key_img} />
+                    <span data-testid="access-key-text" className="access-key-text" >{accessKey}</span>
                   </div>);
     }
 
-    return (<div className={"access-key" + (accessKey ? " enabled" : "") } >
+    return (<div data-testid="access-key" className={"access-key" + (accessKey ? " enabled" : "") } >
             {elms}
             </div>);
 }
