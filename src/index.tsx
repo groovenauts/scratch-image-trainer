@@ -453,7 +453,7 @@ const Selector = (props) => {
         return [basename].concat(canvasModifierClassNames).join(" ");
     }
 
-    const translucent = ((appInfo.phase == "done" || appInfo.phase == "uploaded") && !props.isPredicted && appInfo.videoFlag);
+    const translucent = ((appInfo.phase == "done") && !props.isPredicted && appInfo.videoFlag);
 
     return <div className={"selector-cell" + (translucent ? " translucent" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
         <div className={"selector-label" + (capturing ? " capturing" : "")} >
@@ -544,7 +544,7 @@ const Trainer = (props) => {
         if (phase == "training" || phase == "uploading") {
             componentHandler.upgradeAllRegistered();
         }
-        if ((phase == "done" || phase == "uploaded") && appInfo.videoFlag) {
+        if ((phase == "done") && appInfo.videoFlag) {
             let running = true;
             const video = props.webcamRef;
             const fn = () => {
@@ -655,7 +655,7 @@ const Trainer = (props) => {
             appInfo.headNet.save(tf.io.withSaveHandler(modelSaveHandler(postURL))).then((key) => {
                 setModelKey(key)
                 dispatch(new Action("setVideoFlag", false));
-                dispatch(new Action("setPhase", "uploaded"));
+                dispatch(new Action("setPhase", "done"));
             }).catch(error => {
                 console.log("Failed to save model: " + error);
                 dispatch(new Action("setPhase", "done"));
