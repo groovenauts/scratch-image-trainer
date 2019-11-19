@@ -17,9 +17,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
+import Action from "./Action";
 import key_img from "./images/key-24px.svg";
 
 export default function AccessKey(props) {
+    const dispatch = props.dispatch;
     const label = props.label;
     const accessKey = props.accessKey;
 
@@ -41,7 +43,8 @@ export default function AccessKey(props) {
                     textboxRef.current.blur();
                 }
                 setCopying(false);
-            }, 2000);
+                dispatch(new Action("setPhase", "done"));
+            }, 200);
         }
     }, [copying]);
 
