@@ -26,6 +26,7 @@ import AccessKey from "./access_key";
 import SaveModel from "./SaveModel";
 import UploadDialogue from "./UploadDialogue";
 import CopyDialogue from "./CopyDialogue";
+import CopyDoneDialogue from "./CopyDoneDialogue";
 
 import images from "./images/*.svg";
 
@@ -43,6 +44,7 @@ let translations = {
     "copyDialogue1": "Scratchにアップロードしました。",
     "copyDialogue2": "「カギ」をScratchに入力して、画像を判定してみよう!",
     "copyAccessKey": "カギをコピーする",
+    "close": "閉じる",
     "term_of_service": "利用規約",
   },
   "en": {
@@ -58,6 +60,7 @@ let translations = {
     "copyDialogue1": "Upload done.",
     "copyDialogue2": "Enter the key to the Scratch and detect images!",
     "copyAccessKey": "Copy a key",
+    "close": "Close",
     "term_of_service": "Term of Services",
   }
 };
@@ -836,6 +839,7 @@ const Application = () => {
             <Main appInfo={appInfo} dispatch={dispatch} />
             <UploadDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showUploadDialogue"} />
             <CopyDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showCopyDialogue"} />
+            <CopyDoneDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showCopyDoneDialogue"} />
         </div>;
 };
 

@@ -503,6 +503,11 @@ video.webcam {
   font-size: 26px;
 }
 
+.dialogue > .close-button {
+  background: #409C3B;
+  color: #FFFFFF;
+}
+
 #term-of-service {
   position: fixed;
   bottom: 5px;
