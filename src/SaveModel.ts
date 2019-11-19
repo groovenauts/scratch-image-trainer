@@ -24,11 +24,10 @@ const postURL = "https://scratch-image-model-dot-ai-for-edu.appspot.com/models";
 
 export default function SaveModel(appInfo, dispatch, phase) {
     return () => {
-        if (phase != "done") {
+        if (phase != "done" && phase != "showUploadDialogue") {
             return;
         }
         dispatch(new Action("setVideoFlag", false));
-        dispatch(new Action("setPhase", "uploading"));
         setTimeout(() => {
             appInfo.headNet.save(tf.io.withSaveHandler(modelSaveHandler(postURL))).then((key) => {
                 dispatch(new Action("setVideoFlag", false));

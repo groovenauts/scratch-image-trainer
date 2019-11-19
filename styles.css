@@ -401,7 +401,7 @@ video.webcam {
   color: #FFFFFF;
 }
 
-#save-button {
+.save-button {
   background: #42A5F5;
   color: #FFFFFF;
 }
@@ -440,6 +440,53 @@ video.webcam {
   height: 0px;
   top: -30px;
   z-index: -10;
+}
+
+.dialogue-mask {
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  background: #8D8D8D;
+  z-index: 100;
+  visibility: hidden;
+}
+
+.dialogue-mask.visible {
+  visibility: visible;
+}
+
+.dialogue {
+  width: 560px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  align-content: center;
+  justify-content: space-evenly;
+  background: #FFFFFF;
+}
+
+.dialogue > span {
+  font-size: 18px;
+  text-align: center;
+}
+
+.dialogue > button {
+  width: 260px;
+  height: 60px;
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-style: none;
+  font-size: 18px;
 }
 
 #term-of-service {
