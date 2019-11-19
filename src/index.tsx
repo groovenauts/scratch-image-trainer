@@ -24,6 +24,7 @@ import ReactDOM from 'react-dom';
 import Action from "./Action";
 import AccessKey from "./access_key";
 import SaveModel from "./SaveModel";
+import UploadDialogue from "./UploadDialogue";
 
 import images from "./images/*.svg";
 
@@ -35,6 +36,9 @@ let translations = {
     "resetAll": "リセット",
     "train": "トレーニング",
     "save": "Scratchにアップロード",
+    "cancel": "あとで",
+    "uploadDialogue1": "トレーニングが完了しました!",
+    "uploadDialogue2": "トレーニング結果をScratchにアップロードしますか?",
     "copyAccessKey": "カギをコピーする",
     "term_of_service": "利用規約",
   },
@@ -45,6 +49,9 @@ let translations = {
     "resetAll": "reset",
     "train": "Train",
     "save": "Upload to Scratch",
+    "cancel": "Cancel",
+    "uploadDialogue1": "Training finished!",
+    "uploadDialogue2": "Would you upload model to Scratch?",
     "copyAccessKey": "Copy a key",
     "term_of_service": "Term of Services",
   }
@@ -530,7 +537,7 @@ const Trainer = (props) => {
     }
 
     useEffect(() => {
-        if (phase == "training" || phase == "uploading") {
+        if (phase == "training") {
             componentHandler.upgradeAllRegistered();
         }
         if ((phase == "done") && appInfo.videoFlag) {
@@ -628,7 +635,7 @@ const Trainer = (props) => {
                 ys.dispose();
                 optimizer.dispose();
                 dispatch(new Action("setHeadNet", net));
-                dispatch(new Action("setPhase", "done"));
+                dispatch(new Action("setPhase", "showUploadDialogue"));
                 dispatch(new Action("setModelKey", null));
                 dispatch(new Action("setFocused", null));
             });
@@ -654,7 +661,7 @@ const Trainer = (props) => {
               </button></div>);
 
     elms.push(<div key="save-button" className={ (phase == "done") ? "enabled" : "" }>
-                <button id="save-button" onClick={SaveModel(appInfo, dispatch, phase)} >
+                <button className="save-button" onClick={SaveModel(appInfo, dispatch, phase)} >
                   {formatMessage({
                       id: "save",
                       default: "アップロード",
@@ -822,6 +829,7 @@ const Application = () => {
     return <div className="root">
             <Header appInfo={appInfo} dispatch={dispatch} />
             <Main appInfo={appInfo} dispatch={dispatch} />
+            <UploadDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showUploadDialogue"} />
         </div>;
 };
 
