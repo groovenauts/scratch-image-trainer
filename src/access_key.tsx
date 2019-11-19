@@ -43,7 +43,7 @@ export default function AccessKey(props) {
                     textboxRef.current.blur();
                 }
                 setCopying(false);
-                dispatch(new Action("setPhase", "done"));
+                dispatch(new Action("setPhase", "showCopyDoneDialogue"));
             }, 200);
         }
     }, [copying]);
