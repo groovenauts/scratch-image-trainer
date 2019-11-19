@@ -25,6 +25,7 @@ import Action from "./Action";
 import AccessKey from "./access_key";
 import SaveModel from "./SaveModel";
 import UploadDialogue from "./UploadDialogue";
+import CopyDialogue from "./CopyDialogue";
 
 import images from "./images/*.svg";
 
@@ -39,6 +40,8 @@ let translations = {
     "cancel": "あとで",
     "uploadDialogue1": "トレーニングが完了しました!",
     "uploadDialogue2": "トレーニング結果をScratchにアップロードしますか?",
+    "copyDialogue1": "Scratchにアップロードしました。",
+    "copyDialogue2": "「カギ」をScratchに入力して、画像を判定してみよう!",
     "copyAccessKey": "カギをコピーする",
     "term_of_service": "利用規約",
   },
@@ -52,6 +55,8 @@ let translations = {
     "cancel": "Cancel",
     "uploadDialogue1": "Training finished!",
     "uploadDialogue2": "Would you upload model to Scratch?",
+    "copyDialogue1": "Upload done.",
+    "copyDialogue2": "Enter the key to the Scratch and detect images!",
     "copyAccessKey": "Copy a key",
     "term_of_service": "Term of Services",
   }
@@ -669,7 +674,7 @@ const Trainer = (props) => {
                   })}
                 </button>
               </div>);
-    elms.push(<AccessKey key="model-key" label={formatMessage({
+    elms.push(<AccessKey key="model-key" dispatch={dispatch} label={formatMessage({
                   id: "copyAccessKey",
                   default: "カギをコピーする",
                   description: "Text message for copy accessKey."
@@ -830,6 +835,7 @@ const Application = () => {
             <Header appInfo={appInfo} dispatch={dispatch} />
             <Main appInfo={appInfo} dispatch={dispatch} />
             <UploadDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showUploadDialogue"} />
+            <CopyDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showCopyDialogue"} />
         </div>;
 };
 

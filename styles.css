@@ -477,7 +477,7 @@ video.webcam {
   text-align: center;
 }
 
-.dialogue > button {
+.dialogue button {
   width: 260px;
   height: 60px;
   display: flex;
@@ -487,6 +487,20 @@ video.webcam {
   text-align: center;
   border-style: none;
   font-size: 18px;
+}
+
+.dialogue > .access-key {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.dialogue > .access-key > .access-key-label {
+  align-self: center;
+  justify-content: center;
+}
+
+.dialogue > .access-key > .access-key-label > .access-key-text {
+  font-size: 26px;
 }
 
 #term-of-service {

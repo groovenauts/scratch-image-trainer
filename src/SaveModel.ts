@@ -32,7 +32,7 @@ export default function SaveModel(appInfo, dispatch, phase) {
             appInfo.headNet.save(tf.io.withSaveHandler(modelSaveHandler(postURL))).then((key) => {
                 dispatch(new Action("setVideoFlag", false));
                 dispatch(new Action("setModelKey", key));
-                dispatch(new Action("setPhase", "done"));
+                dispatch(new Action("setPhase", "showCopyDialogue"));
             }).catch(error => {
                 console.log("Failed to save model: " + error);
                 dispatch(new Action("setPhase", "done"));
