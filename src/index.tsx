@@ -274,15 +274,15 @@ const WebCam = (props) => {
             ] : [] }
           </div>
           { (appInfo.focused != null) ? [
-            <div className={"webcam-box-border" + (appInfo.capturing ? " capturing" : "")}></div>,
-            <div className={"webcam-box-label" + (appInfo.capturing ? " capturing" : "")} >
+            <div key="webcam-box-border" className={"webcam-box-border" + (appInfo.capturing ? " capturing" : "")}></div>,
+            <div key="webcam-box-label" className={"webcam-box-label" + (appInfo.capturing ? " capturing" : "")} >
               <span className="webcam-box-label-text">{ appInfo.focused+1 }</span>
             </div>
           ] : [] }
         <div className="webcam-controller">
           { appInfo.videoFlag ?
-              <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam_off</i></button> :
-              <button className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam</i></button>}
+              <button key="webcam-controller-button" className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam_off</i></button> :
+              <button key="webcam-controller-button" className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam</i></button>}
           <button className="webcam-controller-button" onClick={toggleCapturing} ><i className="material-icons webcam-controller-button-icon">trip_origin</i></button>
           <button className="webcam-controller-button" onClick={toggleFlipMode} ><i className="material-icons webcam-controller-button-icon">flip</i></button>
         </div>
