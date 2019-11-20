@@ -358,6 +358,10 @@ video.webcam {
   border-radius: 50%;
 }
 
+.capture-button-border.disabled {
+  opacity: 0.5;
+}
+
 .capture-button-start {
   display: flex;
   width: 25px;
