@@ -110,6 +110,20 @@ header {
   background: #F5F5F5 0% 0% no-repeat padding-box;
   border: 1px solid #BDBDBD;
   z-index: 10;
+  animation-name: popVideo;
+  animation-duration: 200ms;
+  animation-iteration-count: 1;
+}
+
+@keyframes popVideo {
+  0% {
+    right: -224px;
+    opacity: 0;
+  }
+  100% {
+    right: 0px;
+    opacity: 1;
+  }
 }
 
 .webcam-box-outer {
