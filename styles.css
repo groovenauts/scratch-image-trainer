@@ -348,10 +348,32 @@ video.webcam {
   font-size: 26px;
 }
 
-.capture-button {
-  position: absolute;
-  left: 4px;
-  bottom: 4px;
+.capture-button-border {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 37px;
+  height: 37px;
+  border: 4px solid #757575;
+  border-radius: 50%;
+}
+
+.capture-button-start {
+  display: flex;
+  width: 25px;
+  height: 25px;
+  border: 4px solid #757575;
+  border-radius: 50%;
+  background: #D84315;
+}
+
+.capture-button-stop {
+  display: flex;
+  width: 15px;
+  height: 15px;
+  border: 4px solid #757575;
+  border-radius: 25%;
+  background: #D84315;
 }
 
 #trainer {
