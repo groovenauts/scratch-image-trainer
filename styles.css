@@ -203,7 +203,7 @@ video.webcam {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .add-selector-cell {
@@ -232,6 +232,7 @@ video.webcam {
   width: 224px;
   height: 224px;
   margin: 10px;
+  overflow: visible;
 }
 
 .selector-cell.translucent {
@@ -333,7 +334,7 @@ video.webcam {
   display: flex;
   justify-content: center;
   position: absolute;
-  top: -15px;
+  top: -25px;
   right: -25px;
   width: 40px;
   height: 40px;
@@ -342,10 +343,15 @@ video.webcam {
   border-radius: 50%;
   color: #FFFFFF;
   z-index: 4;
+  visibility: hidden;
 }
 
 .selector-delete-button > i {
   font-size: 26px;
+}
+
+.selector-cell:hover > .selector-delete-button {
+  visibility: visible;
 }
 
 .capture-button-border {
