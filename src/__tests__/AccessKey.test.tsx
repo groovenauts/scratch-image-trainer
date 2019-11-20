@@ -1,7 +1,7 @@
 import React from "react";
 import { render, fireEvent, waitForElement } from "@testing-library/react";
 
-import AccessKey from "../access_key";
+import AccessKey from "../AccessKey";
 
 function renderAccessKey(props={}) {
       const defaultProps = {
