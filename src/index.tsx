@@ -27,41 +27,50 @@ import SaveModel from "./SaveModel";
 import UploadDialogue from "./UploadDialogue";
 import CopyDialogue from "./CopyDialogue";
 import CopyDoneDialogue from "./CopyDoneDialogue";
+import ResetDialogue from "./ResetDialogue";
 
 import images from "./images/*.svg";
 
 let translations = {
-  "ja": {
-    "headerTitle": "AIブロック(画像)",
-    "loadFile": "ファイル読み込み",
-    "saveFile": "ファイルダウンロード",
-    "resetAll": "リセット",
-    "train": "トレーニング",
-    "save": "Scratchにアップロード",
-    "cancel": "あとで",
-    "uploadDialogue1": "トレーニングが完了しました!",
-    "uploadDialogue2": "トレーニング結果をScratchにアップロードしますか?",
-    "copyDialogue1": "Scratchにアップロードしました。",
-    "copyDialogue2": "「カギ」をScratchに入力して、画像を判定してみよう!",
-    "copyAccessKey": "カギをコピーする",
-    "close": "閉じる",
-    "term_of_service": "利用規約",
-  },
-  "en": {
-    "headerTitle": "AI Block (Image)",
-    "loadFile": "load from file",
-    "saveFile": "download to file",
-    "resetAll": "reset",
-    "train": "Train",
-    "save": "Upload to Scratch",
-    "cancel": "Cancel",
-    "uploadDialogue1": "Training finished!",
-    "uploadDialogue2": "Would you upload model to Scratch?",
-    "copyDialogue1": "Upload done.",
-    "copyDialogue2": "Enter the key to the Scratch and detect images!",
-    "copyAccessKey": "Copy a key",
-    "close": "Close",
-    "term_of_service": "Term of Services",
+    "ja": {
+        "headerTitle": "AIブロック(画像)",
+        "loadFile": "ファイル読み込み",
+        "saveFile": "ファイルダウンロード",
+        "resetAll": "リセット",
+        "train": "トレーニング",
+        "save": "Scratchにアップロード",
+        "cancel": "あとで",
+        "uploadDialogue1": "トレーニングが完了しました!",
+        "uploadDialogue2": "トレーニング結果をScratchにアップロードしますか?",
+        "copyDialogue1": "Scratchにアップロードしました。",
+        "copyDialogue2": "「カギ」をScratchに入力して、画像を判定してみよう!",
+        "copyAccessKey": "カギをコピーする",
+        "resetDialogue1": "撮影した画像をリセットします。",
+        "resetDialogue2": "よろしいですか?",
+        "reset": "リセットする",
+        "cancelReset": "リセットしない",
+        "close": "閉じる",
+        "term_of_service": "利用規約",
+    },
+    "en": {
+        "headerTitle": "AI Block (Image)",
+        "loadFile": "load from file",
+        "saveFile": "download to file",
+        "resetAll": "reset",
+        "train": "Train",
+        "save": "Upload to Scratch",
+        "cancel": "Cancel",
+        "uploadDialogue1": "Training finished!",
+        "uploadDialogue2": "Would you upload model to Scratch?",
+        "copyDialogue1": "Upload done.",
+        "copyDialogue2": "Enter the key to the Scratch and detect images!",
+        "copyAccessKey": "Copy a key",
+        "resetDialogue1": "Going to reset all captured images.",
+        "resetDialogue2": "",
+        "reset": "Reset",
+        "cancelReset": "Do not reset",
+        "close": "Close",
+        "term_of_service": "Term of Services",
   }
 };
 
@@ -78,7 +87,7 @@ const Header = (props) => {
     const dispatch = props.dispatch;
 
     const resetAll = () => {
-        dispatch(new Action("resetAll"));
+        dispatch(new Action("setPhase", "showResetDialogue"));
     };
 
     const loadFromFile = () => {
@@ -840,6 +849,7 @@ const Application = () => {
             <UploadDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showUploadDialogue"} />
             <CopyDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showCopyDialogue"} />
             <CopyDoneDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showCopyDoneDialogue"} />
+            <ResetDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showResetDialogue"} />
         </div>;
 };
 

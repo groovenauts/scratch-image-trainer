@@ -508,6 +508,16 @@ video.webcam {
   color: #FFFFFF;
 }
 
+.dialogue > .reset-button {
+  background: #E53935;
+  color: #FFFFFF;
+}
+
+.dialogue > .cancel-button {
+  background: #409C3B;
+  color: #FFFFFF;
+}
+
 #term-of-service {
   position: fixed;
   bottom: 5px;
