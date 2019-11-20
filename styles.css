@@ -498,7 +498,7 @@ video.webcam {
   flex-direction: column;
   justify-content: center;
   align-content: center;
-  background: #8D8D8D;
+  background: rgba(141, 141, 141, 0.7);
   z-index: 100;
   visibility: hidden;
 }
