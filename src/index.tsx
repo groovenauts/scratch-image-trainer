@@ -22,7 +22,7 @@ import React, { useState, useEffect, useRef, useReducer } from 'react';
 import ReactDOM from 'react-dom';
 
 import Action from "./Action";
-import AccessKey from "./access_key";
+import AccessKey from "./AccessKey";
 import SaveModel from "./SaveModel";
 import UploadDialogue from "./UploadDialogue";
 import CopyDialogue from "./CopyDialogue";

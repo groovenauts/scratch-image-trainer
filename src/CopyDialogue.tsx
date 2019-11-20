@@ -19,7 +19,7 @@ import formatMessage from "format-message";
 import React from 'react';
 
 import Action from "./Action";
-import AccessKey from "./access_key";
+import AccessKey from "./AccessKey";
 
 import key_img from "./images/key-24px.svg";
 
