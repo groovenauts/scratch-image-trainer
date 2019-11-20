@@ -290,6 +290,13 @@ const WebCam = (props) => {
         dispatch(new Action("setCapturing", !appInfo.capturing));
     };
 
+    let videoIcon;
+    if (appInfo.videoFlag) {
+        videoIcon = "videocam_off";
+    } else {
+        videoIcon = "videocam_on";
+    }
+
     return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
@@ -304,9 +311,7 @@ const WebCam = (props) => {
             </div>
           ] : [] }
         <div className="webcam-controller">
-          { appInfo.videoFlag ?
-              <button key="webcam-controller-button" className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam_off</i></button> :
-              <button key="webcam-controller-button" className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">videocam</i></button>}
+          <button key="webcam-controller-button" className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">{videoIcon}</i></button>
           <button className="webcam-controller-button" onClick={toggleCapturing} ><i className="material-icons webcam-controller-button-icon">trip_origin</i></button>
           <button className="webcam-controller-button" onClick={toggleFlipMode} ><i className="material-icons webcam-controller-button-icon">flip</i></button>
         </div>
