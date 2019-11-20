@@ -297,6 +297,14 @@ const WebCam = (props) => {
         videoIcon = "videocam_on";
     }
 
+    const captureButtonInner = [];
+    if (appInfo.capturing) {
+        captureButtonInner.push(<div key="inner" className="capture-button-stop"></div>);
+    } else {
+        captureButtonInner.push(<div key="inner" className="capture-button-start"></div>);
+    }
+    const captureButton = <div className="capture-button-border">{captureButtonInner}</div>;
+
     return <div className="webcam-container">
         <div className="webcam-box-outer">
           <div className="webcam-box-inner">
@@ -312,7 +320,7 @@ const WebCam = (props) => {
           ] : [] }
         <div className="webcam-controller">
           <button key="webcam-controller-button" className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">{videoIcon}</i></button>
-          <button className="webcam-controller-button" onClick={toggleCapturing} ><i className="material-icons webcam-controller-button-icon">trip_origin</i></button>
+          <button className="webcam-controller-button" onClick={toggleCapturing} >{captureButton}</button>
           <button className="webcam-controller-button" onClick={toggleFlipMode} ><i className="material-icons webcam-controller-button-icon">flip</i></button>
         </div>
         </div>
