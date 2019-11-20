@@ -303,7 +303,7 @@ const WebCam = (props) => {
     } else {
         captureButtonInner.push(<div key="inner" className="capture-button-start"></div>);
     }
-    const captureButton = <div className="capture-button-border">{captureButtonInner}</div>;
+    const captureButton = <div className={"capture-button-border" + (appInfo.videoFlag ? "" : " disabled")}>{captureButtonInner}</div>;
 
     return <div className="webcam-container">
         <div className="webcam-box-outer">
