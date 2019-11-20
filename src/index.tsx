@@ -496,7 +496,7 @@ const Selector = (props) => {
             <div key="selector-badge-label" className="selector-badge-label" >{badge}</div>
         ] : []}
         { (focused && badge && !capturing) ? [
-            <button key="selector-badge-button" className="selector-delete-button" onClick={deleteSamples} >
+            <button key="selector-delete-button" className="selector-delete-button" onClick={deleteSamples} >
                 <i className="material-icons">delete</i>
             </div>
         ] : []}
