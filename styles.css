@@ -220,6 +220,10 @@ video.webcam {
   overflow: visible;
 }
 
+#selectors.blank {
+  margin-right: 0px;
+}
+
 .add-selector-cell {
   display: flex;
   align-items: center;
@@ -231,6 +235,10 @@ video.webcam {
   justify-content: center;
   position: relative;
   margin-right: 30px;
+}
+
+#selectors.blank > .add-selector-cell {
+  margin-right: 0px;
 }
 
 .add-selector-cell > .material-icons {
