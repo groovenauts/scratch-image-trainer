@@ -53,7 +53,7 @@ export default function AccessKey(props) {
     elms.push(<button data-testid="access-key-copy" key="access-key-copy" className="access-key-copy-button" onClick={copy} >{label}</button>);
 
     if (accessKey) {
-        elms.push(<input key="access-key-textbox" type="text" className="access-key-textbox" defaultValue={accessKey} size={accessKey.length} readOnly={true} ref={textboxRef} ></input>);
+        elms.push(<input key="access-key-textbox" type="text" className="access-key-textbox" value={accessKey} size={accessKey.length} readOnly={true} ref={textboxRef} ></input>);
         elms.push(<div key="access-key-label" className="access-key-label" >
                     <img className="access-key-icon" src={key_img} />
                     <span data-testid="access-key-text" className="access-key-text" >{accessKey}</span>
