@@ -604,6 +604,9 @@ const Trainer = (props) => {
         if (phase == "training") {
             return;
         }
+        if (!trainable) {
+            return;
+        }
         dispatch(new Action("setFocused", null));
         dispatch(new Action("setPhase", "training"));
 
