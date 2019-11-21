@@ -537,7 +537,11 @@ const Selectors = (props) => {
     for (let i = appInfo.selectorNumber-1; i >= 0; i--) {
         selectors.push(<Selector key={i} index={i} appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} isPredicted={i == appInfo.predicted} imageData={appInfo.sampleImages[i]} />);
     }
-    return <div id="selectors">{selectors}</div>
+    const classNames = [];
+    if (appInfo.selectorNumber == 0) {
+        classNames.push("blank");
+    }
+    return <div id="selectors" className={classNames.join(" ")} >{selectors}</div>
 };
 
 const Trainer = (props) => {
