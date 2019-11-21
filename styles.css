@@ -579,6 +579,11 @@ video.webcam {
   font-size: 11px;
 }
 
+.selector-cell.match {
+  border: 10px dashed #42A5F5 ;
+  margin: 0;
+}
+
 #copyright {
   position: fixed;
   bottom: 5px;

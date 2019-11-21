@@ -483,7 +483,7 @@ const Selector = (props) => {
 
     const translucent = ((appInfo.phase == "done") && !props.isPredicted && appInfo.videoFlag);
 
-    return <div className={"selector-cell" + (translucent ? " translucent" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
+    return <div className={"selector-cell" + (translucent ? " translucent" : (appInfo.phase == "done") ? " match" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
         <div className={"selector-label" + (capturing ? " capturing" : "")} >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
