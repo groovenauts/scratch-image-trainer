@@ -313,11 +313,13 @@ const WebCam = (props) => {
             ] : [] }
           </div>
           { (appInfo.focused != null) ? [
-            <div key="webcam-box-border" className={"webcam-box-border" + (appInfo.capturing ? " capturing" : "")}></div>,
-            <div key="webcam-box-label" className={"webcam-box-label" + (appInfo.capturing ? " capturing" : "")} >
+            <div key="webcam-box-border" className={"webcam-box-border" + (appInfo.capturing ? " capturing" : " focused")}></div>,
+            <div key="webcam-box-label" className={"webcam-box-label" + (appInfo.capturing ? " capturing" : " focused")} >
               <span className="webcam-box-label-text">{ appInfo.focused+1 }</span>
             </div>
-          ] : [] }
+          ] : [
+            <div key="webcam-box-border" className={"webcam-box-border"}></div>
+          ] }
         <div className="webcam-controller">
           <button key="webcam-controller-button" className="webcam-controller-button" onClick={toggleVideoFlag} ><i className="material-icons webcam-controller-button-icon">{videoIcon}</i></button>
           <button className="webcam-controller-button" onClick={toggleCapturing} >{captureButton}</button>
