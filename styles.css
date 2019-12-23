@@ -608,6 +608,10 @@ video.webcam {
   font-size: 11px;
 }
 
+#term-of-service>a {
+  color: #6E6E6E;
+}
+
 #copyright {
   position: fixed;
   bottom: 5px;
