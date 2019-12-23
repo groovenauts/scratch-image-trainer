@@ -494,7 +494,7 @@ const Selector = (props) => {
     const predicted = ((appInfo.phase == "done") && props.isPredicted && appInfo.videoFlag);
 
     return <div className={"selector-cell" + (predicted ? " predicted" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
-        <div className={"selector-label" + (capturing ? " capturing" : "")} >
+        <div className={"selector-label" + (focused ? " focused" : "") + (capturing ? " capturing" : "")} >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
         <div className="selector-canvas-container" >

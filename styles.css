@@ -282,16 +282,20 @@ video.webcam {
   z-index: 2;
 }
 
-.selector-label.capturing {
+.selector-label.focused.capturing {
   background: #E64A19;
 }
 
-.selector-label:not(.capturing) {
+.selector-label.focused {
   background: #FEC600;
 }
 
+.selector-label:not(.focused) {
+  background: #757575;
+}
+
 .selector-label-text {
-  color: gray;
+  color: white;
   font-size: 24px;
   padding: 6px;
 }
