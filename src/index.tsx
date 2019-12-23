@@ -211,13 +211,19 @@ const Header = (props) => {
                             id: "headerTitle",
                             description: "Text message in header."
         })}</div>
-        <div className="header-menu" onClick={loadFromFile} >{formatMessage({
+        <div className="header-menu" onClick={loadFromFile} >
+          <i className="material-icons">cloud_upload</i>
+          {formatMessage({
                             id: "loadFile",
                             description: "Text label for load file."})}</div>
-        <div className="header-menu" onClick={saveToFile} >{formatMessage({
-                            id: "saveFile",
-                            description: "Text label for save file."})}</div>
-        <div id="reset" className="header-menu" onClick={resetAll} >{formatMessage({
+        <div className="header-menu" onClick={saveToFile} >
+          <i className="material-icons">save_alt</i>
+          {formatMessage({
+                         id: "saveFile",
+                         description: "Text label for save file."})}</div>
+        <div id="reset" className="header-menu" onClick={resetAll} >
+          <i className="material-icons">refresh</i>
+          {formatMessage({
                             id: "resetAll",
                             description: "Text label for reset."})}</div>
         </header>;
