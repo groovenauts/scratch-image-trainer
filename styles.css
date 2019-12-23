@@ -265,10 +265,6 @@ video.webcam {
   overflow: visible;
 }
 
-.selector-cell.translucent {
-  opacity: 0.5;
-}
-
 .selector-label {
   display: flex;
   justify-content: center;
@@ -310,7 +306,12 @@ video.webcam {
   margin-bottom: 6px;
 }
 
-.selector-cell.predicted {
+.selector-cell-predicted-mask {
+  height: 100%;
+  width: 100%;
+  z-index: 999;
+  background-color: #FEC600;
+  opacity: 0.3;
 }
 
 .selector-cell:not(.focused) {
@@ -465,7 +466,7 @@ video.webcam {
   margin-bottom: 0px;
   height: 4px;
   width: 100%;
-  top: 21px;
+  top: 11px;
 }
 
 #train-button {

@@ -485,9 +485,9 @@ const Selector = (props) => {
         return [basename].concat(canvasModifierClassNames).join(" ");
     }
 
-    const translucent = ((appInfo.phase == "done") && !props.isPredicted && appInfo.videoFlag);
+    const predicted = ((appInfo.phase == "done") && props.isPredicted && appInfo.videoFlag);
 
-    return <div className={"selector-cell" + (translucent ? " translucent" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
+    return <div className={"selector-cell" + (predicted ? " predicted" : "") + (focused ? " focused" : "") + (capturing ? " capturing" : "")} onClick={toggleFocused} >
         <div className={"selector-label" + (capturing ? " capturing" : "")} >
           <span className="selector-label-text">{ props.index + 1 }</span>
         </div>
@@ -503,6 +503,9 @@ const Selector = (props) => {
             <button key="selector-delete-button" className="selector-delete-button" onClick={deleteSamples} >
                 <i className="material-icons">delete</i>
             </div>
+        ] : []}
+        { (predicted ) ? [
+            <div className="selector-cell-predicted-mask"></div>
         ] : []}
     </div>;
 };
