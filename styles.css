@@ -51,8 +51,9 @@ header {
 }
 
 .header-logo {
-  margin-left: 5px;
+  margin-left: 15px;
   margin-right: 5px;
+  margin-bottom: 6px;
 }
 
 .header-title {
@@ -193,7 +194,7 @@ video.webcam {
   padding: 5px;
   border-bottom-style: solid;
   border-bottom-width: 1px;
-  border-bottom-color: #6E6E6E;
+  border-bottom-color: #BDBDBD;
   border-top: 1px solid #6E6E6E;
 }
 
@@ -253,7 +254,6 @@ video.webcam {
   position: relative;
   width: 224px;
   height: 224px;
-  margin: 10px;
   overflow: visible;
 }
 
@@ -288,19 +288,28 @@ video.webcam {
 
 .selector-cell.focused {
   border: 10px solid #FEC600 ;
-  margin: 0px;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 .selector-cell.focused.capturing {
   border: 10px solid #E64A19 ;
-  margin: 0px;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 .selector-cell.predicted {
 }
 
 .selector-cell:not(.focused) {
-  margin: 10px;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .selector-canvas-container {
@@ -382,7 +391,7 @@ video.webcam {
   align-items: center;
   width: 37px;
   height: 37px;
-  border: 4px solid #757575;
+  border: 3px solid #757575;
   border-radius: 50%;
 }
 
@@ -394,7 +403,7 @@ video.webcam {
   display: flex;
   width: 25px;
   height: 25px;
-  border: 4px solid #757575;
+  border: 3px solid #757575;
   border-radius: 50%;
   background: #D84315;
 }
@@ -428,11 +437,11 @@ video.webcam {
 
 #trainer > div > button {
   width: 200px;
-  height: 60px;
+  height: 50px;
   margin: 0px;
   padding: 0px;
   border-style: none;
-  border-radius: 0px;
+  border-radius: 3px;
   font-size: 18px;
 }
 
@@ -575,13 +584,13 @@ video.webcam {
 #term-of-service {
   position: fixed;
   bottom: 5px;
-  margin-left: 5px;
+  margin-left: 12px;
   font-size: 11px;
 }
 
 #copyright {
   position: fixed;
   bottom: 5px;
-  right: 5px;
+  right: 12px;
   font-size: 11px;
 }

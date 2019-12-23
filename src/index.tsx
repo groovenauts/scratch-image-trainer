@@ -326,12 +326,14 @@ const WebCam = (props) => {
         </div>
         <Trainer appInfo={appInfo} dispatch={dispatch} webcamRef={props.webcamRef} />
         <div id="term-of-service">
+            <a href="https://www.techpark.jp/aiblock/terms">
             {formatMessage({id: "term_of_service",
                              default: "利用規約",
                              description: "Text message on anchor to Term of Services."
               })}
+            </a>
         </div>
-        <div id="copyright">2019 TECH PARK</div>
+        <div id="copyright">&copy;2019 TECH PARK</div>
       </div>
 }
 
