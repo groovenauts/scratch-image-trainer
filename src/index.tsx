@@ -24,7 +24,7 @@ import ReactDOM from 'react-dom';
 import Action from "./Action";
 import AccessKey from "./AccessKey";
 import SaveModel from "./SaveModel";
-import UploadDialogue from "./UploadDialogue";
+import TrainingDoneDialogue from "./TrainingDoneDialogue";
 import CopyDialogue from "./CopyDialogue";
 import CopyDoneDialogue from "./CopyDoneDialogue";
 import ResetDialogue from "./ResetDialogue";
@@ -40,8 +40,7 @@ let translations = {
         "train": "トレーニング",
         "save": "Scratchにアップロード",
         "cancel": "あとで",
-        "uploadDialogue1": "トレーニングが完了しました!",
-        "uploadDialogue2": "トレーニング結果をScratchにアップロードしますか?",
+        "trainingDoneDialogue1": "トレーニングが完了しました!",
         "copyDialogue1": "Scratchにアップロードしました。",
         "copyDialogue2": "「カギ」をScratchに入力して、画像を判定してみよう!",
         "copyAccessKey": "カギをコピーする",
@@ -60,8 +59,7 @@ let translations = {
         "train": "Train",
         "save": "Upload to Scratch",
         "cancel": "Cancel",
-        "uploadDialogue1": "Training finished!",
-        "uploadDialogue2": "Would you upload model to Scratch?",
+        "trainingDoneDialogue1": "Training finished!",
         "copyDialogue1": "Upload done.",
         "copyDialogue2": "Enter the key to the Scratch and detect images!",
         "copyAccessKey": "Copy a key",
@@ -685,7 +683,7 @@ const Trainer = (props) => {
                 ys.dispose();
                 optimizer.dispose();
                 dispatch(new Action("setHeadNet", net));
-                dispatch(new Action("setPhase", "showUploadDialogue"));
+                dispatch(new Action("setPhase", "showTrainingDoneDialogue"));
                 dispatch(new Action("setModelKey", null));
                 dispatch(new Action("setFocused", null));
             });
@@ -879,7 +877,7 @@ const Application = () => {
     return <div className="root">
             <Header appInfo={appInfo} dispatch={dispatch} />
             <Main appInfo={appInfo} dispatch={dispatch} />
-            <UploadDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showUploadDialogue"} />
+            <TrainingDoneDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showTrainingDoneDialogue"} />
             <CopyDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showCopyDialogue"} />
             <CopyDoneDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showCopyDoneDialogue"} />
             <ResetDialogue appInfo={appInfo} dispatch={dispatch} show={appInfo.phase == "showResetDialogue"} />

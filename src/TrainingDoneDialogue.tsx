@@ -19,26 +19,19 @@ import formatMessage from "format-message";
 import React, { useState, useEffect, useRef } from 'react';
 
 import Action from "./Action";
-import SaveModel from "./SaveModel";
 
-export default function UploadDialogue(props) {
+export default function TrainingDoneDialogue(props) {
     const appInfo = props.appInfo;
     const dispatch = props.dispatch;
     const show = props.show;
-    const text1 = formatMessage({ id: "uploadDialogue1",
-                                   default: "アップロードしますか",
-                                   description: "Text message on upload dialogue."});
-    const text2 = formatMessage({ id: "uploadDialogue2",
-                                default: "アップロードしますか",
-                                description: "Text message on upload dialogue."});
-    const uploadLabel = formatMessage({ id: "save",
-                                        default: "アップロード",
-                                        description: "Text message on upload button."});
-    const cancelLabel = formatMessage({ id: "cancel",
-                                        default: "キャンセル",
-                                        description: "Text message on cancel button."});
+    const text1 = formatMessage({ id: "trainingDoneDialogue1",
+                                   default: "トレーニングが完了しました",
+                                   description: "Text message on training done dialogue."});
+    const closeLabel = formatMessage({ id: "close",
+                                        default: "閉じる",
+                                        description: "Text message on close button."});
 
-    const cancel = () {
+    const close = () {
         dispatch(new Action("setPhase", "done"));
     };
 
@@ -50,9 +43,8 @@ export default function UploadDialogue(props) {
 
     return <div key="dialogue-mask" className={maskClasses.join(" ")} >
         <div key="dialogue" className="dialogue" >
-          <span>{text1}<br />{text2}</span>
-          <button className="save-button" onClick={SaveModel(appInfo, dispatch, appInfo.phase)} >{uploadLabel}</button>
-          <button className="cancel-button" onClick={cancel} >{cancelLabel}</button>
+          <span>{text1}</span>
+          <button className="close-button" onClick={close} >{closeLabel}</button>
         </div>
       </div>;
 }
