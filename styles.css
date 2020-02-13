@@ -99,6 +99,7 @@ header {
   flex-direction: column;
   margin: 0px;
   justify-content: center;
+  align-items: center;
 }
 
 .loading-message {
@@ -224,6 +225,31 @@ video.webcam {
 .webcam-controller-button-icon {
   font-size: 45px !important;
   color: #6E6E6E;
+}
+
+.startup-message {
+  position: relative;
+  color: #FFFFFF;
+  background: #42A5F5;
+  width: 320px;
+  height: 20px;
+  font-size: 20px;
+  text-align: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 20px;
+}
+
+.startup-message:after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -20px;
+  border: 20px solid transparent;
+  border-top: 20px solid #42A5F5;
+  content: "";
 }
 
 #selectors {

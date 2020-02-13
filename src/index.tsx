@@ -40,6 +40,7 @@ let translations = {
         "train": "トレーニング",
         "save": "Scratchにアップロード",
         "cancel": "あとで",
+        "startupMessage": "画像をトレーニングさせよう",
         "trainingDoneDialogue1": "トレーニングが完了しました!",
         "copyDialogue1": "Scratchにアップロードしました。",
         "copyDialogue2": "「カギ」をScratchに入力して、画像を判定してみよう!",
@@ -59,6 +60,7 @@ let translations = {
         "train": "Train",
         "save": "Upload to Scratch",
         "cancel": "Cancel",
+        "startupMessage": "Let's capture images",
         "trainingDoneDialogue1": "Training finished!",
         "copyDialogue1": "Upload done.",
         "copyDialogue2": "Enter the key to the Scratch and detect images!",
@@ -532,6 +534,15 @@ const AddSelector = (props) => {
     </div>;
 };
 
+const StartupMessage = (props) => {
+    const appInfo = props.appInfo;
+    const dispatch = props.dispatch;
+
+    const msg = formatMessage({id: "startupMessage", description: "The message in the initial view."});
+
+    return <div className="startup-message" >{msg}</div>
+};
+
 const Selectors = (props) => {
     const appInfo = props.appInfo;
     const dispatch = props.dispatch;
@@ -742,6 +753,7 @@ const Main = (props) => {
                 </div>
         } else {
             return <div className="main">
+                    <StartupMessage appInfo={appInfo} dispatch={dispatch} />
                     <Selectors appInfo={appInfo} dispatch={dispatch} webcamRef={webcamRef} />
                 </div>
         }
