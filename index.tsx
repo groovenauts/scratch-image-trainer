@@ -102,7 +102,7 @@ const WebCam = (props) => {
 
     useEffect(() => {
         const navigatorAny = navigator;
-        navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia ||
             navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
             navigatorAny.msGetUserMedia;
         if (appInfo.videoFlag && navigator.getUserMedia) {
