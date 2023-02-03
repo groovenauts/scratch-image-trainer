@@ -106,7 +106,9 @@ const WebCam = (props) => {
             navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
             navigatorAny.msGetUserMedia;
         if (appInfo.videoFlag && navigator.getUserMedia) {
-            navigator.getUserMedia({video: {facingMode: "environment"}}, handleStream, () => null);
+            //navigator.getUserMedia({video: {facingMode: "environment"}}, handleStream, () => null);
+            // TODO: メニューで user か environment か選べるようにする
+            navigator.getUserMedia({video: true}, handleStream, () => null);
             return () => {
                 if (stopCallback) {
                     stopCallback();
