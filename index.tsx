@@ -101,23 +101,32 @@ const WebCam = (props) => {
     }
 
     useEffect(() => {
+        if (!props.webcamRef.current) {
+            return;
+        }
+        props.webcamRef.current.autoplay = true;
+        props.webcamRef.current.setAttribute("muted", "muted");
+        props.webcamRef.current.playsinline = true;
+        props.webcamRef.current.controls = true;
         const navigatorAny = navigator;
-        navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia ||
-            navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
-            navigatorAny.msGetUserMedia;
-        if (appInfo.videoFlag && navigator.getUserMedia) {
-            //navigator.getUserMedia({video: {facingMode: "environment"}}, handleStream, () => null);
+        //navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || navigator.getUserMedia ||
+        //    navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
+        //    navigatorAny.msGetUserMedia;
+        if (appInfo.videoFlag && navigator.mediaDevices.getUserMedia) {
+            //navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}}, handleStream, () => null);
             // TODO: メニューで user か environment か選べるようにする
-            navigator.getUserMedia({video: true}, handleStream, () => null);
+            navigator.mediaDevices.getUserMedia({video: true, audio: false}).then((stream) => handleStream(stream)).catch(() => null);
+            props.webcamRef.current.controls = false;
             return () => {
                 if (stopCallback) {
                     stopCallback();
                 }
             };
         } else {
+            props.webcamRef.current.controls = false;
             return;
         }
-    }, [appInfo.videoFlag]);
+    }, [props.webcamRef, appInfo.videoFlag]);
 
     const webcamClassNames = [ "webcam" ];
     if (appInfo.flipMode) {
